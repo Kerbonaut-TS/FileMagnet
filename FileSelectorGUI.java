@@ -2,13 +2,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+
 public class FileSelectorGUI extends JFrame {
+
+
     //settings field
     private JRadioButton extension_radio, similarity_radio;
     JFormattedTextField extension_field;
     private JCheckBox  name_box, size_box, date_box;
     private JLabel fileCountLabel;
     JTextField destinationPath, targetPath;
+    JRadioButton move_radio, copy_radio;
 
     //Panels
     private JPanel similarityPanel, extentionPanel, checkboxes;
@@ -17,73 +21,75 @@ public class FileSelectorGUI extends JFrame {
 
         super("File Magnet");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(350, 500);
+        setSize(350, 550);
         setLocationRelativeTo(null);
         setResizable(false);
+        java.net.URL url = ClassLoader.getSystemResource("rsc/icon.png");
+        ImageIcon icon = new ImageIcon(url);
+        setIconImage(icon.getImage());
 
         // Destination panel setup
+        extension_radio = new JRadioButton("by extension");
+        extension_radio.addActionListener(e -> clickExtension());
+        extension_radio.setSelected(true);
         extentionPanel = create_extensionPanel();
-        similarityPanel = create_similarityPanel();
-        JPanel destinationPanel = create_target_Selector();
-        JPanel targetPanel = create_destination_Selector();
-
 
         similarity_radio = new JRadioButton("by similarity with...");
         similarity_radio.addActionListener(e -> clickSimilarity());
-        extension_radio = new JRadioButton("by extension");
-        extension_radio.addActionListener(e -> clickExtension());
+        similarityPanel = create_similarityPanel();
+
         ButtonGroup group = new ButtonGroup();
         group.add(extension_radio);
         group.add(similarity_radio);
-        extension_radio.setSelected(true);
         clickExtension();
 
-        // Execute button
-        JButton executeButton = new JButton("Attraction");
-        executeButton.addActionListener(e -> executeButton());
 
-        // Layout
+        JPanel destinationPanel = create_destination_Selector();
+        JPanel targetPanel = create_target_Selector();
+
+        // Execute Panel
+        JPanel execPanel = create_execPanel();
+
+
+        // Main Layout
         JPanel mainPanel = new JPanel();
+        // Set vertical layout and center alignment
+        mainPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        mainPanel.add(new JLabel("Attract files:"));
+        //mainPanel.add(new JLabel("Attract files:"));
         mainPanel.add(extension_radio);
         mainPanel.add(extentionPanel);
         mainPanel.add(similarity_radio);
         mainPanel.add(similarityPanel);
         mainPanel.add(targetPanel);
         mainPanel.add(destinationPanel);
-        mainPanel.add(executeButton);
+        mainPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+        mainPanel.add(execPanel);
+        mainPanel.setBorder(BorderFactory.createTitledBorder("Attraction rules"));
 
         add(mainPanel);
         setVisible(true);
     }
 
     private JPanel create_extensionPanel(){
-        JPanel criteriaPanel = new JPanel();
-        criteriaPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-         extension_field = new JFormattedTextField();
+        JPanel panel = new JPanel();
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        extension_field = new JFormattedTextField();
         extension_field.setColumns(10);
         extension_field.setText(".JPG; .JPEG");
-        criteriaPanel.add(extension_field);
-
-
-        return criteriaPanel;
+        panel.add(extension_field);
+        return panel;
 
     }
 
 
 
     private JPanel create_similarityPanel(){
-        JPanel similarityPanel = new JPanel();
-        similarityPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
 
         JButton selectFilesButton = new JButton("Select similar Files");
         selectFilesButton.addActionListener(e -> selectMultipleFiles());
         fileCountLabel = new JLabel("No files selected");
-
         checkboxes  = new JPanel();
         checkboxes.setLayout(new BoxLayout(checkboxes, BoxLayout.Y_AXIS));
         name_box = new JCheckBox("same name");
@@ -92,41 +98,17 @@ public class FileSelectorGUI extends JFrame {
         checkboxes.add(name_box);
         checkboxes.add(size_box);
         checkboxes.add(date_box);
-
-        similarityPanel.add(selectFilesButton);
-        similarityPanel.add(fileCountLabel);
-        similarityPanel.add(checkboxes);
-
-        return similarityPanel;
+        //layout
+        JPanel panel = new JPanel();
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(selectFilesButton);
+        panel.add(fileCountLabel);
+        panel.add(checkboxes);
+        return panel;
 
     }
 
 
-
-    private JPanel create_destination_Selector() {
-
-        JPanel destinationPanel = new JPanel();
-        destinationPath = new JTextField(25);
-        JButton browseButton = new JButton("Change Directory");
-
-        String currentDir = System.getProperty("user.dir");
-        destinationPath.setText(currentDir);
-
-        destinationPanel.add(destinationPath);
-        destinationPanel.add(browseButton);
-        destinationPanel.setBorder(BorderFactory.createTitledBorder("Aim magnet at"));
-
-        browseButton.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int returnVal = chooser.showOpenDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                destinationPath.setText(chooser.getSelectedFile().getAbsolutePath());
-            }
-        });
-
-        return destinationPanel;
-    }
 
     private JPanel create_target_Selector() {
 
@@ -137,8 +119,7 @@ public class FileSelectorGUI extends JFrame {
         JPanel targetPanel = new JPanel();
         targetPanel.add(targetPath);
         targetPanel.add(browseButton);
-        targetPanel.setBorder(BorderFactory.createTitledBorder("Attract files to"));
-
+        targetPanel.setBorder(BorderFactory.createTitledBorder("Aim magnet at"));
 
         browseButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
@@ -153,21 +134,69 @@ public class FileSelectorGUI extends JFrame {
     }
 
 
-    private File[] selectMultipleFiles(){
-        StringBuilder filenames = new StringBuilder("Selected files:\n");
-        JFileChooser fileChooser = new JFileChooser();
 
-        fileChooser.setMultiSelectionEnabled(true);
-        int returnVal = fileChooser.showOpenDialog(this);
+    private JPanel create_destination_Selector() {
+
+        destinationPath = new JTextField(25);
+        destinationPath.setText(System.getProperty("user.dir"));
+        JButton browseButton = new JButton("Change Directory");
+        //layout
+        JPanel destinationPanel = new JPanel();
+        destinationPanel.add(destinationPath);
+        destinationPanel.add(browseButton);
+        destinationPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+        destinationPanel.setBorder(BorderFactory.createTitledBorder("Attract files to"));
+
+
+        browseButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                destinationPath.setText(chooser.getSelectedFile().getAbsolutePath());
+            }
+        });
+
+        return destinationPanel;
+    }
+
+
+    private JPanel create_execPanel(){
+
+        ButtonGroup execGroup = new ButtonGroup();
+        move_radio = new JRadioButton("move files");
+        copy_radio = new JRadioButton("copy files");
+        execGroup.add(move_radio);
+        execGroup.add(copy_radio);
+        copy_radio.setSelected(true);
+        JPanel radioPanel = new JPanel();
+        radioPanel.add(move_radio);
+        radioPanel.add(copy_radio);
+        JButton executeButton = new JButton("Go!");
+        executeButton.addActionListener(e -> executeButton());
+        executeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Set vertical layout
+        panel.add(radioPanel);
+        panel.add(executeButton);
+        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        return panel;
+
+    }
+
+    private File[] selectMultipleFiles(){
+
         File[] files = new File[0];
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setMultiSelectionEnabled(true);
+
+        int returnVal = fileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             files = fileChooser.getSelectedFiles();
-
         }
 
         fileCountLabel.setText(files.length + "selected" );
         return files;
-
     }
 
 
