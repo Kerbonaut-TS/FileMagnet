@@ -1,10 +1,14 @@
+import src.Magnet;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 
 public class FileSelectorGUI extends JFrame {
 
+    Magnet magnet;
 
     //settings field
     private JRadioButton extension_radio, similarity_radio;
@@ -12,6 +16,7 @@ public class FileSelectorGUI extends JFrame {
     private JCheckBox  name_box, size_box, date_box;
     private JLabel fileCountLabel;
     JTextField destinationPath, targetPath;
+    File[] sample;
     JRadioButton move_radio, copy_radio;
 
     //Panels
@@ -20,6 +25,7 @@ public class FileSelectorGUI extends JFrame {
     public FileSelectorGUI() {
 
         super("File Magnet");
+        this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(350, 550);
         setLocationRelativeTo(null);
@@ -88,7 +94,7 @@ public class FileSelectorGUI extends JFrame {
     private JPanel create_similarityPanel(){
 
         JButton selectFilesButton = new JButton("Select similar Files");
-        selectFilesButton.addActionListener(e -> selectMultipleFiles());
+        selectFilesButton.addActionListener(e -> select_sample());
         fileCountLabel = new JLabel("No files selected");
         checkboxes  = new JPanel();
         checkboxes.setLayout(new BoxLayout(checkboxes, BoxLayout.Y_AXIS));
@@ -156,7 +162,7 @@ public class FileSelectorGUI extends JFrame {
                 destinationPath.setText(chooser.getSelectedFile().getAbsolutePath());
             }
         });
-
+        // Add action listener to update the magnet's workdir
         return destinationPanel;
     }
 
@@ -173,7 +179,7 @@ public class FileSelectorGUI extends JFrame {
         radioPanel.add(move_radio);
         radioPanel.add(copy_radio);
         JButton executeButton = new JButton("Go!");
-        executeButton.addActionListener(e -> executeButton());
+        executeButton.addActionListener(e -> {try {executeButton();} catch (IOException ex) {throw new RuntimeException(ex);}});
         executeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Set vertical layout
@@ -184,7 +190,7 @@ public class FileSelectorGUI extends JFrame {
 
     }
 
-    private File[] selectMultipleFiles(){
+    private File[] select_sample(){
 
         File[] files = new File[0];
         JFileChooser fileChooser = new JFileChooser();
@@ -220,20 +226,24 @@ public class FileSelectorGUI extends JFrame {
         }
     }
 
-    private void executeButton(){
+    private void executeButton() throws IOException {
         String command = "";
         String criteria = "";
 
         if (extension_radio.isSelected()){
             String extensions = extension_field.getText();
-            command = "Attract by extenion:" + extensions;}
+            command = "Attract by extension:" + extensions;}
         else if (similarity_radio.isSelected()) {
             if (name_box.isSelected()) criteria += "Name ";
             if (size_box.isSelected()) criteria += "Size ";
             if (date_box.isSelected()) criteria += "Date ";
+            magnet.set_similarSample(targetPath.getText());
             command = "Similarity with criteria: " + criteria;
         }
-
+        this.magnet.setWorkdir(this.destinationPath.getText());
+        this.
+        this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false, move_radio.isSelected());
+        this.magnet.attractSimilar(this.targetPath.getText());
         JOptionPane.showMessageDialog(this, command, "Message", JOptionPane.INFORMATION_MESSAGE);
     }
 

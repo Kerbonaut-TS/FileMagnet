@@ -16,11 +16,16 @@ public class Magnet {
 
     }
 
+    public void setWorkdir(String workingDirectory){
+        this.workdir = new File(workingDirectory);
+
+    }
     public void set_similarSample(String filepath){
         fileComparator = new FileComparator(filepath);
 
     }
-    public void change_settings(Boolean name, Boolean extension, Boolean date, Boolean size){
+    public void change_settings(Boolean name, Boolean extension, Boolean date, Boolean size, Boolean move) {
+        this.move = move;
         fileComparator.change_settings(name, extension, date, size);
     }
     public void attractSimilar(String targetDirectory) throws IOException {
@@ -28,7 +33,7 @@ public class Magnet {
 
         for (File f : files) {
             if (!f.isFile()) continue; // Skip directories
-            Boolean similar = fileComparator.compare(f.getAbsolutePath());
+            Boolean similar = fileComparator.compare(f);
             if(similar){
                 System.out.println("Attracting similar file: " + f.getName());
                 if ((this.move)) {

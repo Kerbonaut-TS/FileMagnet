@@ -4,12 +4,10 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
-
 import java.io.File;
 
 
 public class FileComparator {
-
 
     File[]  files;
     String[] names;
@@ -18,8 +16,6 @@ public class FileComparator {
     String[] dates;
     Boolean[] bool_mask;
 
-
-    // checks: name, extension, date, size
     Boolean[] checks = {false, false, false ,false};
     int NAME_CHECK = 0;
     int EXT_CHECK = 1;
@@ -32,18 +28,15 @@ public class FileComparator {
         File file = new File(filepath);
         if (!file.exists()) {
             System.out.println("File does not exist: " + filepath);
-
             this.files = file.listFiles();
             this.bool_mask = new Boolean[this.files.length];
 
             for (int i = 0; i <= this.files.length; i++) {
-
                 String filename = this.files[i].getName();
                 int dotIndex = filename.lastIndexOf('.');
                 this.names[i] = this.separate_name(this.files[i]);
                 this.extensions[i] = this.separate_extension(this.files[i]);
             }
-
         }//end constructor
     }
 
@@ -79,11 +72,10 @@ public class FileComparator {
         }
         return false;
     }
-    public Boolean compare( String filepath){
+    public Boolean compare(File file){
         Boolean output = true;
 
         //file to compare
-        File file = new File(filepath);
         String name = this.separate_name(file);
         String extension = this.separate_extension(file);
 
@@ -96,7 +88,6 @@ public class FileComparator {
                 output = output & results[i];
             }
         }
-
         return output;
     }//end compare
 
