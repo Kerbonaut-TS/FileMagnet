@@ -145,7 +145,7 @@ public class FileSelectorGUI extends JFrame {
         destinationPanel.add(destinationPath);
         destinationPanel.add(browseButton);
         destinationPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
-        destinationPanel.setBorder(BorderFactory.createTitledBorder("Attract files to"));
+        destinationPanel.setBorder(BorderFactory.createTitledBorder("Collect files in"));
 
 
         browseButton.addActionListener(e -> {
