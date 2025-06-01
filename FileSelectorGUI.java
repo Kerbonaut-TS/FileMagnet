@@ -23,7 +23,7 @@ public class FileSelectorGUI extends JFrame {
 
     public FileSelectorGUI() {
 
-        super("File Magnet v0.2");
+        super("File Magnet v0.31");
         this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(350, 700);
@@ -249,12 +249,13 @@ public class FileSelectorGUI extends JFrame {
     private void executeButton() throws IOException {
 
         this.magnet.setWorkdir(this.workingdirPath.getText());
+        this.magnet.set_trasfer_mode(move_radio.isSelected());
+        this.magnet.set_recursive(recursiveBox.isSelected());
 
         if (extension_radio.isSelected()){
+
            String extension = extension_field.getText();
-           this.magnet.set_trasfer_mode(move_radio.isSelected());
            this.magnet.set_extension_filter(extension);
-           this.magnet.set_recursive(recursiveBox.isSelected());
            this.magnet.attract_extension(this.targetPath.getText());
 
         }else if (similarity_radio.isSelected()) {
@@ -263,7 +264,6 @@ public class FileSelectorGUI extends JFrame {
                 this.sample = sample_dir.listFiles();
             }
             this.magnet.set_reference_sample(this.sample);
-            this.magnet.set_trasfer_mode(move_radio.isSelected());
             this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false);
             this.magnet.attractSimilar(this.targetPath.getText());
         }

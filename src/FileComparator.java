@@ -51,8 +51,8 @@ public class FileComparator {
             String filename = this.samplefiles[i].getName();
             System.out.println("analyzing sample: " + filename);
             int dotIndex = filename.lastIndexOf('.');
-            this.names[i] = this. separate_name(sample[i]);
-            this.extensions[i] = this.separate_extension(sample[i]);
+            this.names[i] = this.separate_name(this.samplefiles[i]);
+            this.extensions[i] = this.separate_extension(this.samplefiles[i]);
 
         }
 
@@ -160,7 +160,7 @@ public class FileComparator {
         File[] newList = new File[file_count];
 
         for (File f : fileList) {
-            if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".")) {
+            if (!f.isDirectory() &&  !f.isHidden() && f.getName().contains(".")) {
                 newList[i] = f;
                 i++;
             }

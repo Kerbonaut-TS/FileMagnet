@@ -18,7 +18,7 @@ public class Magnet extends FileComparator{
 
     public void setWorkdir(String workingDirectory){this.workdir = new File(workingDirectory);}
     public void set_extension_filter(String ext_filter){this.ext_filter = ext_filter;}
-    public void set_recursive(Boolean recursive) {this.set_recursive(recursive);}
+    public void set_recursive(Boolean recursive) {this.recursive = recursive;}
     public void set_trasfer_mode(Boolean move) {
         this.move = move;
     }
@@ -49,9 +49,10 @@ public class Magnet extends FileComparator{
         File[] targetFiles = FileComparator.searchFiles(target_dir, this.recursive);
 
         for (File f : targetFiles) {
+            System.out.println("Comparing file: " + f.getName());
             Boolean similar = super.compare(f);
             if(similar){
-                System.out.println("Attracting similar file: " + f.getName());
+                System.out.print(" -- match found");
                 if ((this.move)) {
                     this.move(f);
                 } else {
