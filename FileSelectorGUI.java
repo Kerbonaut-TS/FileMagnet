@@ -186,6 +186,7 @@ public class FileSelectorGUI extends JFrame {
         JButton executeButton = new JButton("Go!");
         executeButton.addActionListener(e -> {try {executeButton();} catch (IOException ex) {throw new RuntimeException(ex);}});
         executeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        executeButton.setVerticalAlignment(SwingConstants.CENTER);
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Set vertical layout
         panel.add(radioPanel);
