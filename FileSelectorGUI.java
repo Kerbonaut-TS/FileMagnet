@@ -1,5 +1,4 @@
 import src.Magnet;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -15,7 +14,7 @@ public class FileSelectorGUI extends JFrame {
     JFormattedTextField extension_field;
     private JCheckBox  name_box, size_box, date_box;
     private JLabel fileCountLabel;
-    JTextField workingdirPath, targetPath;
+    JTextField workingdirPath, targetPath, samplePath;
     File[] sample;
     JRadioButton move_radio, copy_radio;
 
@@ -27,7 +26,7 @@ public class FileSelectorGUI extends JFrame {
         super("File Magnet");
         this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(350, 550);
+        setSize(350, 700);
         setLocationRelativeTo(null);
         setResizable(false);
         java.net.URL url = ClassLoader.getSystemResource("rsc/icon.png");
@@ -92,7 +91,7 @@ public class FileSelectorGUI extends JFrame {
 
 
     private JPanel create_similarityPanel(){
-
+        this.samplePath = new JTextField(20);
         JButton selectFilesButton = new JButton("Select similar Files");
         selectFilesButton.addActionListener(e -> select_sample());
         fileCountLabel = new JLabel("No files selected");
@@ -107,6 +106,7 @@ public class FileSelectorGUI extends JFrame {
         //layout
         JPanel panel = new JPanel();
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(samplePath);
         panel.add(selectFilesButton);
         panel.add(fileCountLabel);
         panel.add(checkboxes);
@@ -130,6 +130,7 @@ public class FileSelectorGUI extends JFrame {
         browseButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setCurrentDirectory(new File(workingdirPath.getText()));
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 targetPath.setText(chooser.getSelectedFile().getAbsolutePath());
@@ -157,6 +158,7 @@ public class FileSelectorGUI extends JFrame {
         browseButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setCurrentDirectory(new File(workingdirPath.getText()));
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 workingdirPath.setText(chooser.getSelectedFile().getAbsolutePath());
@@ -192,18 +194,28 @@ public class FileSelectorGUI extends JFrame {
 
     private File[] select_sample(){
 
-        File[] files = new File[0];
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setCurrentDirectory(new File(workingdirPath.getText()));
 
         int returnVal = fileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            files = fileChooser.getSelectedFiles();
+            this.sample = fileChooser.getSelectedFiles();
         }
 
-        fileCountLabel.setText(files.length + "selected" );
-        this.magnet.set_reference_sample(files);
-        return files;
+        if(this.sample.length == 1){
+            samplePath.setText(this.sample[0].getAbsolutePath());
+            fileCountLabel.setText(this.sample.length + "selected" );
+
+        } else if( this.sample.length > 1){
+            samplePath.setText(this.sample[0].getParent());
+            fileCountLabel.setText(this.sample.length + "selected" );
+
+        } else{
+            samplePath.setText("");
+        }
+        this.magnet.set_reference_sample(this.sample);
+        return this.sample;
     }
 
 
@@ -216,6 +228,9 @@ public class FileSelectorGUI extends JFrame {
     private void clickSimilarity() {
         toggleSimilarity(true);
         extension_field.setEnabled(false);
+        this.samplePath.setText(this.workingdirPath.getText());
+        File sample_dir = new File(this.samplePath.getText());
+        fileCountLabel.setText(sample_dir.listFiles() == null ? "0 files selected" : sample_dir.listFiles().length + " files selected");
     }
 
     private void toggleSimilarity(Boolean on) {
@@ -228,22 +243,26 @@ public class FileSelectorGUI extends JFrame {
     }
 
     private void executeButton() throws IOException {
-        String command = "";
-        String criteria = "";
+
+        this.magnet.setWorkdir(this.workingdirPath.getText());
 
         if (extension_radio.isSelected()){
-            String extensions = extension_field.getText();
-            command = "Attract by extension:" + extensions;}
-        else if (similarity_radio.isSelected()) {
-            if (name_box.isSelected()) criteria += "Name ";
-            if (size_box.isSelected()) criteria += "Size ";
-            if (date_box.isSelected()) criteria += "Date ";
-            command = "Similarity with criteria: " + criteria;
+           String extension = extension_field.getText();
+           this.magnet.set_trasfer_mode(move_radio.isSelected());
+           this.magnet.set_extension_filter(extension);
+           this.magnet.attract_extension(this.targetPath.getText());
+
+        }else if (similarity_radio.isSelected()) {
+            if (this.sample  == null && !samplePath.getText().isEmpty()) {
+                File sample_dir = new File(samplePath.getText());
+                this.sample = sample_dir.listFiles();
+            }
+            this.magnet.set_reference_sample(this.sample);
+            this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false, move_radio.isSelected());
+            this.magnet.attractSimilar(this.targetPath.getText());
         }
-        this.magnet.setWorkdir(this.destinationPath.getText());
-        this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false, move_radio.isSelected());
-        this.magnet.attractSimilar(this.targetPath.getText());
-        JOptionPane.showMessageDialog(this, command, "Message", JOptionPane.INFORMATION_MESSAGE);
+        
+        JOptionPane.showMessageDialog(this, "Completed!", "Message", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public static void main(String[] args) {

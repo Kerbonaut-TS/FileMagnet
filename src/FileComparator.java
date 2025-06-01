@@ -46,9 +46,16 @@ public class FileComparator {
 
         for (int i = 0; i < sample.length; i++) {
             String filename = sample[i].getName();
+            System.out.println("analyzing sample: " + filename);
             int dotIndex = filename.lastIndexOf('.');
-            this.names[i] = this.separate_name(sample[i]);
-            this.extensions[i] = this.separate_extension(sample[i]);
+            if (!sample[i].isFile() |  sample[i].isHidden() | !sample[i].getName().contains(".")) {
+                this.names[i] = "";
+                this.extensions[i] =  "null";
+            } else{
+                this.names[i] = this.separate_name(sample[i]);
+                this.extensions[i] = this.separate_extension(sample[i]);
+            }
+
         }
 
     }
@@ -72,13 +79,13 @@ public class FileComparator {
     }//end compare
 
 
-    private String separate_name(File file){
+    public String separate_name(File file){
         String filename = file.getName();
         int dotIndex = filename.lastIndexOf('.');
         return file.getName().substring(0, dotIndex);
     }
 
-    private String separate_extension(File file) {
+    public String separate_extension(File file) {
         String filename = file.getName();
         int dotIndex = filename.lastIndexOf('.');
         return file.getName().substring(dotIndex, filename.length());
