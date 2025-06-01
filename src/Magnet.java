@@ -8,7 +8,7 @@ import java.nio.file.StandardCopyOption;
 public class Magnet extends FileComparator{
     // A magnet is a file comparator that can move or copy files and has additional settings
     File workdir;
-    Boolean move;
+    Boolean move = false, recursive = false;
     String ext_filter;
 
 
@@ -16,37 +16,22 @@ public class Magnet extends FileComparator{
         this.setWorkdir(workingDirectory);
     }
 
-    public void setWorkdir(String workingDirectory){
-        this.workdir = new File(workingDirectory);
-
-    }
-    public void set_extension_filter(String ext_filter){
-        this.ext_filter = ext_filter;
-    }
-
-    public void change_settings(Boolean name, Boolean extension, Boolean date, Boolean size, Boolean move) {
-        this.set_trasfer_mode(move);
-        super.change_settings(name, extension, date, size);
-    }
-
+    public void setWorkdir(String workingDirectory){this.workdir = new File(workingDirectory);}
+    public void set_extension_filter(String ext_filter){this.ext_filter = ext_filter;}
+    public void set_recursive(Boolean recursive) {this.set_recursive(recursive);}
     public void set_trasfer_mode(Boolean move) {
         this.move = move;
     }
 
     public void attract_extension(String targetDirectory) throws IOException {
 
-        File[] target_files = new File(targetDirectory).listFiles();
+        File[] target_dir = new File(targetDirectory).listFiles();
+        File[] targetFiles = FileComparator.searchFiles(target_dir, this.recursive);
 
-        for (File f : target_files) {
+        for (File f : targetFiles) {
 
             System.out.println("Processing file: " + f.getName());
-
-            if (!f.isFile()) continue; // Skip directories
-            if (f.isHidden()) continue; // Skip hidden files
-            if (!f.getName().contains(".")) continue; // Skip files with no extension
-
-            FileComparator comparator = new FileComparator();
-            String ext  = comparator.separate_extension(f);
+            String ext  = super.separate_extension(f);
             if(ext.contains(this.ext_filter)) {
                 if ((this.move)) {
                     this.move(f);
@@ -59,10 +44,11 @@ public class Magnet extends FileComparator{
     }
     public void attractSimilar(String targetDirectory) throws IOException {
 
-        File[] target_files = new File(targetDirectory).listFiles();
 
-        for (File f : target_files) {
-            if (!f.isFile()) continue; // Skip directories
+        File[] target_dir = new File(targetDirectory).listFiles();
+        File[] targetFiles = FileComparator.searchFiles(target_dir, this.recursive);
+
+        for (File f : targetFiles) {
             Boolean similar = super.compare(f);
             if(similar){
                 System.out.println("Attracting similar file: " + f.getName());

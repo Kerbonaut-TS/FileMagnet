@@ -5,6 +5,9 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 
 public class FileComparator {
@@ -34,27 +37,24 @@ public class FileComparator {
         this.checks[SIZE_CHECK] = size;
     }
 
-    public void set_reference_sample(File[] sample){
-        this.samplefiles = sample;
-        this.bool_mask = new Boolean[sample.length];
-        this.names = new String[sample.length];
-        this.extensions = new String[sample.length];
+    public void set_reference_sample(File[] sample) throws IOException {
+
+        this.samplefiles = FileComparator.searchFiles(sample, false);
+        int filecount = this.samplefiles.length;
+        this.bool_mask = new Boolean[filecount];
+        this.names = new String[filecount];
+        this.extensions = new String[filecount];
 
         for (Boolean b : this.bool_mask) {
             b = false;
         }
 
-        for (int i = 0; i < sample.length; i++) {
-            String filename = sample[i].getName();
+        for (int i = 0; i < filecount; i++) {
+            String filename = this.samplefiles[i].getName();
             System.out.println("analyzing sample: " + filename);
             int dotIndex = filename.lastIndexOf('.');
-            if (!sample[i].isFile() |  sample[i].isHidden() | !sample[i].getName().contains(".")) {
-                this.names[i] = "";
-                this.extensions[i] =  "null";
-            } else{
-                this.names[i] = this.separate_name(sample[i]);
-                this.extensions[i] = this.separate_extension(sample[i]);
-            }
+            this.names[i] = this.separate_name(sample[i]);
+            this.extensions[i] = this.separate_extension(sample[i]);
 
         }
 
@@ -132,6 +132,43 @@ public class FileComparator {
 
     }//end method
 
+    public static File[] searchFiles(File[] fileList, Boolean recursive) throws IOException {
 
+            File[] checklist = fileList.clone();
+            if (recursive) {
+                if (checklist != null) {
+                    for (File f : checklist) {
+                        if (f.isDirectory())
+                            //file array with directory
+                            fileList = Stream.concat(Arrays.stream(fileList), Arrays.stream(FileComparator.searchFiles(f.listFiles(), true))).toArray(File[]::new);
+                    }//end for
+                }//end if
+            }//end if recursive
+
+        return FileComparator.clean_filelist(fileList);
+
+    }//end getFileList
+
+    private static File[] clean_filelist(File[] fileList) {
+
+        int ignore_count, i;
+        ignore_count = 0;
+        i = 0;
+
+
+        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".")) ignore_count++;
+
+        int file_count = fileList.length - ignore_count;
+        File[] newList = new File[file_count];
+
+        for (File f : fileList) {
+            if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".")) {
+                newList[i] = f;
+                i++;
+            }
+        }
+        return newList;
+
+    }
 
 }

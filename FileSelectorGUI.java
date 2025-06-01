@@ -12,7 +12,7 @@ public class FileSelectorGUI extends JFrame {
     //settings field
     private JRadioButton extension_radio, similarity_radio;
     JFormattedTextField extension_field;
-    private JCheckBox  name_box, size_box, date_box;
+    private JCheckBox  name_box, size_box, date_box, recursiveBox;
     private JLabel fileCountLabel;
     JTextField workingdirPath, targetPath, samplePath;
     File[] sample;
@@ -23,7 +23,7 @@ public class FileSelectorGUI extends JFrame {
 
     public FileSelectorGUI() {
 
-        super("File Magnet");
+        super("File Magnet v0.2");
         this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(350, 700);
@@ -93,7 +93,8 @@ public class FileSelectorGUI extends JFrame {
     private JPanel create_similarityPanel(){
         this.samplePath = new JTextField(20);
         JButton selectFilesButton = new JButton("Select similar Files");
-        selectFilesButton.addActionListener(e -> select_sample());
+        selectFilesButton.addActionListener(e -> {try {select_sample();} catch (IOException ex) {throw new RuntimeException(ex);}
+        });
         fileCountLabel = new JLabel("No files selected");
         checkboxes  = new JPanel();
         checkboxes.setLayout(new BoxLayout(checkboxes, BoxLayout.Y_AXIS));
@@ -120,11 +121,13 @@ public class FileSelectorGUI extends JFrame {
 
         targetPath = new JTextField(25);
         targetPath.setText("");
+        this.recursiveBox = new JCheckBox("Search subdirectories");
         JButton browseButton = new JButton("Change Directory");
 
         JPanel targetPanel = new JPanel();
         targetPanel.add(targetPath);
         targetPanel.add(browseButton);
+        targetPanel.add(recursiveBox);
         targetPanel.setBorder(BorderFactory.createTitledBorder("Aim magnet at"));
 
         browseButton.addActionListener(e -> {
@@ -192,7 +195,7 @@ public class FileSelectorGUI extends JFrame {
 
     }
 
-    private File[] select_sample(){
+    private File[] select_sample() throws IOException {
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(true);
@@ -250,6 +253,7 @@ public class FileSelectorGUI extends JFrame {
            String extension = extension_field.getText();
            this.magnet.set_trasfer_mode(move_radio.isSelected());
            this.magnet.set_extension_filter(extension);
+           this.magnet.set_recursive(recursiveBox.isSelected());
            this.magnet.attract_extension(this.targetPath.getText());
 
         }else if (similarity_radio.isSelected()) {
@@ -258,7 +262,8 @@ public class FileSelectorGUI extends JFrame {
                 this.sample = sample_dir.listFiles();
             }
             this.magnet.set_reference_sample(this.sample);
-            this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false, move_radio.isSelected());
+            this.magnet.set_trasfer_mode(move_radio.isSelected());
+            this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false);
             this.magnet.attractSimilar(this.targetPath.getText());
         }
         
