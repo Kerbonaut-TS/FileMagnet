@@ -9,7 +9,7 @@ import java.io.File;
 
 public class FileComparator {
 
-    File[]  files;
+    File[]  samplefiles;
     String[] names;
     String[] extensions;
     int[]  sizes;
@@ -23,54 +23,34 @@ public class FileComparator {
     int SIZE_CHECK = 3;
 
 
-    public FileComparator(String filepath) {
+    public FileComparator() {
 
-        File file = new File(filepath);
-        if (!file.exists()) {
-            System.out.println("File does not exist: " + filepath);
-            this.files = file.listFiles();
-            this.bool_mask = new Boolean[this.files.length];
 
-            for (int i = 0; i <= this.files.length; i++) {
-                String filename = this.files[i].getName();
-                int dotIndex = filename.lastIndexOf('.');
-                this.names[i] = this.separate_name(this.files[i]);
-                this.extensions[i] = this.separate_extension(this.files[i]);
-            }
-        }//end constructor
     }
-
-    public void change_settings(Boolean name, Boolean extension, Boolean date, Boolean size){
+    public void change_settings(Boolean name, Boolean extension, Boolean date, Boolean size) {
         this.checks[NAME_CHECK] = name;
         this.checks[EXT_CHECK] = extension;
         this.checks[DATE_CHECK] = date;
         this.checks[SIZE_CHECK] = size;
     }
 
-    public String separate_name(File file){
-        String filename = file.getName();
-        int dotIndex = filename.lastIndexOf('.');
-        return file.getName().substring(0, dotIndex);
-    }
+    public void set_reference_sample(File[] sample){
+        this.samplefiles = sample;
+        this.bool_mask = new Boolean[sample.length];
+        this.names = new String[sample.length];
+        this.extensions = new String[sample.length];
 
-    public String separate_extension(File file) {
-        String filename = file.getName();
-        int dotIndex = filename.lastIndexOf('.');
-        return file.getName().substring(dotIndex, filename.length());
-    }
-
-    public Boolean check_name(String name){
-        for (String n : this.names){
-            if (n.contains(name)) return true;
+        for (Boolean b : this.bool_mask) {
+            b = false;
         }
-        return false;
-    }
 
-    public Boolean check_extension(String extension){
-        for (String n : this.extensions){
-            if (n.contains(extension)) return true;
+        for (int i = 0; i < sample.length; i++) {
+            String filename = sample[i].getName();
+            int dotIndex = filename.lastIndexOf('.');
+            this.names[i] = this.separate_name(sample[i]);
+            this.extensions[i] = this.separate_extension(sample[i]);
         }
-        return false;
+
     }
     public Boolean compare(File file){
         Boolean output = true;
@@ -83,7 +63,7 @@ public class FileComparator {
         if (checks[NAME_CHECK]) results[NAME_CHECK] = this.check_name(name);
         if (checks[EXT_CHECK])  results[EXT_CHECK] =  this.check_extension(name);
 
-        for (int i = 0; i<=this.checks.length; i++) {
+        for (int i = 0; i<this.checks.length; i++) {
             if (this.checks[i]) {
                 output = output & results[i];
             }
@@ -92,7 +72,34 @@ public class FileComparator {
     }//end compare
 
 
-    public boolean isImage(String ext){
+    private String separate_name(File file){
+        String filename = file.getName();
+        int dotIndex = filename.lastIndexOf('.');
+        return file.getName().substring(0, dotIndex);
+    }
+
+    private String separate_extension(File file) {
+        String filename = file.getName();
+        int dotIndex = filename.lastIndexOf('.');
+        return file.getName().substring(dotIndex, filename.length());
+    }
+
+    private Boolean check_name(String name){
+        for (String n : this.names){
+            if (n.contains(name)) return true;
+        }
+        return false;
+    }
+
+    private Boolean check_extension(String extension){
+        for (String n : this.extensions){
+            if (n.contains(extension)) return true;
+        }
+        return false;
+    }
+
+
+    private boolean isImage(String ext){
 
         boolean is_image = ext.toLowerCase().contains(".jpg") || ext.toLowerCase().contains(".RAF") || ext.contains(".jpeg")|| ext.contains(".png");
 
@@ -101,7 +108,7 @@ public class FileComparator {
 
 
 
-    public String getExifTag (File file, String select_tag) {
+    private String getExifTag (File file, String select_tag) {
 
         try{ Metadata metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
             for (Directory directory : metadata.getDirectories()) {

@@ -202,6 +202,7 @@ public class FileSelectorGUI extends JFrame {
         }
 
         fileCountLabel.setText(files.length + "selected" );
+        this.magnet.set_reference_sample(files);
         return files;
     }
 
@@ -237,11 +238,9 @@ public class FileSelectorGUI extends JFrame {
             if (name_box.isSelected()) criteria += "Name ";
             if (size_box.isSelected()) criteria += "Size ";
             if (date_box.isSelected()) criteria += "Date ";
-            magnet.set_similarSample(targetPath.getText());
             command = "Similarity with criteria: " + criteria;
         }
         this.magnet.setWorkdir(this.destinationPath.getText());
-        this.
         this.magnet.change_settings(name_box.isSelected(), size_box.isSelected(), date_box.isSelected(), false, move_radio.isSelected());
         this.magnet.attractSimilar(this.targetPath.getText());
         JOptionPane.showMessageDialog(this, command, "Message", JOptionPane.INFORMATION_MESSAGE);
