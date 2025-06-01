@@ -15,7 +15,7 @@ public class FileSelectorGUI extends JFrame {
     JFormattedTextField extension_field;
     private JCheckBox  name_box, size_box, date_box;
     private JLabel fileCountLabel;
-    JTextField destinationPath, targetPath;
+    JTextField workingdirPath, targetPath;
     File[] sample;
     JRadioButton move_radio, copy_radio;
 
@@ -50,7 +50,7 @@ public class FileSelectorGUI extends JFrame {
         clickExtension();
 
 
-        JPanel destinationPanel = create_destination_Selector();
+        JPanel destinationPanel = create_workingdir_Selector();
         JPanel targetPanel = create_target_Selector();
 
         // Execute Panel
@@ -141,14 +141,14 @@ public class FileSelectorGUI extends JFrame {
 
 
 
-    private JPanel create_destination_Selector() {
+    private JPanel create_workingdir_Selector() {
 
-        destinationPath = new JTextField(25);
-        destinationPath.setText(System.getProperty("user.dir"));
+        workingdirPath = new JTextField(25);
+        workingdirPath.setText(System.getProperty("user.dir"));
         JButton browseButton = new JButton("Change Directory");
         //layout
         JPanel destinationPanel = new JPanel();
-        destinationPanel.add(destinationPath);
+        destinationPanel.add(workingdirPath);
         destinationPanel.add(browseButton);
         destinationPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         destinationPanel.setBorder(BorderFactory.createTitledBorder("Collect files in"));
@@ -159,7 +159,7 @@ public class FileSelectorGUI extends JFrame {
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                destinationPath.setText(chooser.getSelectedFile().getAbsolutePath());
+                workingdirPath.setText(chooser.getSelectedFile().getAbsolutePath());
             }
         });
         // Add action listener to update the magnet's workdir
