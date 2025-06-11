@@ -10,7 +10,7 @@ Example:
 
 1. place the app in a folder with images.
 2. launch the jar/exe 
-3. similarity rules are pre-filled based pn the folder conntent (customize if necessary)
+3. similarity rules are pre-filled based pn the folder content (customize if necessary)
 4. select the target
 5. press start.
 
