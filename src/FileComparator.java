@@ -35,6 +35,11 @@ public class FileComparator {
         this.checks[EXT_CHECK] = extension;
         this.checks[DATE_CHECK] = date;
         this.checks[SIZE_CHECK] = size;
+
+        if (date){
+            for (int i = 0; i < this.samplefiles.length; i++) {
+                this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");}
+        }
     }
 
     public void set_reference_sample(File[] sample) throws IOException {
@@ -44,6 +49,8 @@ public class FileComparator {
         this.bool_mask = new Boolean[filecount];
         this.names = new String[filecount];
         this.extensions = new String[filecount];
+        this.dates = new String[filecount];
+        this.sizes = new int[filecount];
 
         for (Boolean b : this.bool_mask) b = false;
 
@@ -53,7 +60,7 @@ public class FileComparator {
             int dotIndex = filename.lastIndexOf('.');
             this.names[i] = this.separate_name(this.samplefiles[i]);
             this.extensions[i] = this.separate_extension(this.samplefiles[i]);
-
+            this.sizes[i] = (int) this.samplefiles[i].length();
         }
 
     }
@@ -104,14 +111,14 @@ public class FileComparator {
         return false;
     }
 
+    private Boolean check_date(String date){
 
-    private boolean isImage(String ext){
 
-        boolean is_image = ext.toLowerCase().contains(".jpg") || ext.toLowerCase().contains(".RAF") || ext.contains(".jpeg")|| ext.contains(".png");
-
-        return is_image;
+        for (String d : this.dates){
+            if (d.contains(date)) return true;
+        }
+        return false;
     }
-
 
 
     private String getExifTag (File file, String select_tag) {

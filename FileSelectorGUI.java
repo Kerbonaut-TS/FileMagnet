@@ -23,7 +23,7 @@ public class FileSelectorGUI extends JFrame {
 
     public FileSelectorGUI() {
 
-        super("File Magnet v0.31");
+        super("File Magnet v0.9");
         this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(350, 700);
@@ -82,6 +82,7 @@ public class FileSelectorGUI extends JFrame {
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         extension_field = new JFormattedTextField();
         extension_field.setColumns(10);
+        
         extension_field.setText(".JPG; .JPEG");
         panel.add(extension_field);
         return panel;
@@ -268,7 +269,7 @@ public class FileSelectorGUI extends JFrame {
             this.magnet.attractSimilar(this.targetPath.getText());
         }
         
-        JOptionPane.showMessageDialog(this, "Completed!", "Message", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, this.magnet.getOutcome(), "Completed!", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public static void main(String[] args) {
