@@ -18,11 +18,14 @@ public class Magnet extends FileComparator{
     int count_ignored = 0;
     int count_transferred = 0;
 
-    public Magnet(String workingDirectory){
+    public Magnet(String workingDirectory) throws IOException {
         this.setWorkdir(workingDirectory);
     }
 
-    public void setWorkdir(String workingDirectory){this.workdir = new File(workingDirectory);}
+    public void setWorkdir(String workingDirectory) throws IOException {
+        this.workdir = new File(workingDirectory);
+        this.set_reference_sample(this.workdir.listFiles());
+    }
     public void set_extension_filter(String ext_filter){this.ext_filter = ext_filter;}
     public void set_recursive(Boolean recursive) {this.recursive = recursive;}
     public void set_trasfer_mode(Boolean move) {

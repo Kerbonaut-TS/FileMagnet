@@ -64,6 +64,14 @@ public class FileComparator {
         }
 
     }
+
+    public String getNames(){
+        StringBuilder sb = new StringBuilder();
+        for (String name : this.names) {
+            sb.append(name).append(";");
+        }
+        return sb.toString();
+    }
     public Boolean compare(File file){
         Boolean output = true;
 
@@ -103,6 +111,8 @@ public class FileComparator {
         }
         return false;
     }
+
+
 
     private Boolean check_extension(String extension){
         for (String n : this.extensions){
