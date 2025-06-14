@@ -61,6 +61,7 @@ public class FileSelectorGUI extends JFrame {
         setVisible(true);
     }
 
+
     private JPanel create_workingdir_Selector() {
 
         workingdirPath = new JTextField(25);
@@ -206,56 +207,18 @@ public class FileSelectorGUI extends JFrame {
         }
     }
 
-
-    private File[] select_sample() throws IOException {
-
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(true);
-        fileChooser.setCurrentDirectory(new File(workingdirPath.getText()));
-
-        int returnVal = fileChooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            this.sample = fileChooser.getSelectedFiles();
-        }
-
-        if(this.sample.length == 1){
-            samplePath.setText(this.sample[0].getAbsolutePath());
-            fileCountLabel.setText(this.sample.length + "selected" );
-
-        } else if( this.sample.length > 1){
-            samplePath.setText(this.sample[0].getParent());
-            fileCountLabel.setText(this.sample.length + "selected" );
-
-        } else{
-            samplePath.setText("");
-        }
-        this.magnet.set_reference_sample(this.sample);
-        return this.sample;
-    }
-
-
-
-    private void clickSimilarity() {
-        extension_field.setEnabled(false);
-        this.samplePath.setText(this.workingdirPath.getText());
-        File sample_dir = new File(this.samplePath.getText());
-        fileCountLabel.setText(sample_dir.listFiles() == null ? "0 files selected" : sample_dir.listFiles().length + " files selected");
-    }
-
-
     private void execute() throws IOException {
 
         this.magnet.setWorkdir(this.workingdirPath.getText());
         this.magnet.set_trasfer_mode(move_radio.isSelected());
         this.magnet.set_recursive(recursiveBox.isSelected());
 
-
         if (this.sample  == null && !samplePath.getText().isEmpty()) {
             File sample_dir = new File(samplePath.getText());
             this.sample = sample_dir.listFiles();
         }
         this.magnet.set_reference_sample(this.sample);
-        this.magnet.change_settings(name_box.isEnabled(), same_content_box.isEnabled(), time_box.isEnabled(), false);
+        this.magnet.change_settings(name_box.isEnabled(), same_content_box.isEnabled(), time_box.isEnabled(), false); //TODO link settings
         this.magnet.attractSimilar(this.targetPath.getText());
 
         JOptionPane.showMessageDialog(this, this.magnet.getOutcome(), "Completed!", JOptionPane.INFORMATION_MESSAGE);
