@@ -65,12 +65,21 @@ public class FileComparator {
 
     }
 
-    public String getNames(){
+    public String getNames( int limit){
         StringBuilder sb = new StringBuilder();
+        int count = 0;
         for (String name : this.names) {
-            sb.append(name).append(";");
+            sb.append(name).append(" ; ");
+            count++;
+            if (count >= limit) break;
         }
+        int residual = this.names.length - count;
+        sb.append(".. and "+residual+" more");
         return sb.toString();
+    }
+
+    public int getSampleCount() {
+        return this.samplefiles.length;
     }
     public Boolean compare(File file){
         Boolean output = true;

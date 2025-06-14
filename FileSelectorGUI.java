@@ -27,7 +27,7 @@ public class FileSelectorGUI extends JFrame {
         super("File Magnet v0.9");
         this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 600);
+        setSize(360, 800);
         setLocationRelativeTo(null);
         //setResizable(false);
         java.net.URL url = ClassLoader.getSystemResource("rsc/icon.png");
@@ -37,19 +37,22 @@ public class FileSelectorGUI extends JFrame {
         JPanel wdirectory_panel = create_workingdir_Selector();
         JPanel targetPanel = create_target_Panel();
         JPanel optionsPanel = this.create_optionsPanel();
-        JPanel transfer_Panel= this.create_transferOptionsPanel();
+        JPanel transfer_Panel= this.create_transferPanel();
 
-        JPanel execPanel = create_execPanel();
-
+        JPanel execPanel = new JPanel(new FlowLayout());
+        JButton executeButton = new JButton("Go!");
+        executeButton.addActionListener(e -> {try {execute();} catch (IOException ex) {throw new RuntimeException(ex);}});
+        execPanel.add(executeButton);
 
         // Main Layout
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setAlignmentX(Component.RIGHT_ALIGNMENT); // Align panel to the left
 
         mainPanel.add(wdirectory_panel);
         mainPanel.add(targetPanel);
+        mainPanel.add(Box.createVerticalStrut(10)); // Add some space between sections
         mainPanel.add(transfer_Panel);
+        mainPanel.add(Box.createVerticalStrut(10)); // Add some space between sections
         mainPanel.add(optionsPanel);
         mainPanel.add(execPanel);
 
@@ -62,7 +65,8 @@ public class FileSelectorGUI extends JFrame {
 
         workingdirPath = new JTextField(25);
         workingdirPath.setText(System.getProperty("user.dir"));
-        this.fileCountLabel = new JLabel("0 files detected");
+
+        this.fileCountLabel = new JLabel(magnet.getSampleCount() + " files detected");
 
         //layout
         JPanel panel = new JPanel(new FlowLayout());
@@ -104,9 +108,12 @@ public class FileSelectorGUI extends JFrame {
         return panel;
     }
 
-    public JPanel create_transferOptionsPanel() {
+    public JPanel create_transferPanel() {
+        ButtonGroup execGroup = new ButtonGroup();
         move_radio = new JRadioButton("move files");
         copy_radio = new JRadioButton("copy files");
+        execGroup.add(move_radio);
+        execGroup.add(copy_radio);
 
         copy_radio.setSelected(true);
         JPanel panel = new JPanel(new FlowLayout());
@@ -123,27 +130,32 @@ public class FileSelectorGUI extends JFrame {
         extension_field = new JFormattedTextField();
         extension_field.setColumns(10);
         extension_field.setText(".JPG; .JPEG");
-        namesLabel = new JLabel(this.magnet.getNames());
-        JPanel timeoptions = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        //create a vertical list
+        JList<String> namelist = new JList<>(this.magnet.getNames(4).split(";"));
+        namelist.setLayoutOrientation(JList.VERTICAL);
+
+        JPanel timeoptions = new JPanel();
+        timeoptions.setLayout(new BoxLayout(timeoptions, BoxLayout.Y_AXIS));
         sameH = new JCheckBox("same HH");
         sameM = new JCheckBox("same MM");
         sameS = new JCheckBox("same SS");
         timeoptions.add(sameH);
         timeoptions.add(sameM);
         timeoptions.add(sameS);
-        similarContentLabel = new JLabel("Coming soon!");
+        JLabel similarContentLabel = new JLabel("Coming soon!");
+        JLabel sameContentLabel = new JLabel("Coming soon!");
 
         //create options
-        extension_box = this.create_option("same extensions:", extension_field, false);
-        name_box = this.create_option("same names:", namesLabel, true);
+        extension_box = this.create_option("with same extensions:", extension_field, false);
+        name_box = this.create_option("with same names:", namelist, true);
         time_box = this.create_option("taken at same time:", timeoptions, false);
-        same_content_box = this.create_option("same content:", similarContentLabel,false);
-        similar_content_box = this.create_option("similar content:", similarContentLabel, false);
+        same_content_box = this.create_option("with same content:", similarContentLabel,false);
+        similar_content_box = this.create_option("with similar content:", sameContentLabel, false);
 
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionsPanel.setAlignmentX(Component.RIGHT_ALIGNMENT); // Align panel to the left
-        optionsPanel.setBorder(BorderFactory.createTitledBorder("Settings"));
+        //optionsPanel.setBorder(BorderFactory.createTitledBorder("Settings"));
         optionsPanel.add(extension_box);
         optionsPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         optionsPanel.add(name_box);
@@ -193,23 +205,7 @@ public class FileSelectorGUI extends JFrame {
             component.setEnabled(enabled);
         }
     }
-    private JPanel create_execPanel(){
 
-        ButtonGroup execGroup = new ButtonGroup();
-
-        JButton executeButton = new JButton("Go!");
-        executeButton.addActionListener(e -> {try {executeButton();} catch (IOException ex) {throw new RuntimeException(ex);}});
-        executeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        executeButton.setVerticalAlignment(SwingConstants.CENTER);
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Set vertical layout
-        panel.setAlignmentX(Component.RIGHT_ALIGNMENT); // Align panel to the left
-        panel.add(executeButton);
-        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        return panel;
-
-    }
 
     private File[] select_sample() throws IOException {
 
@@ -247,7 +243,7 @@ public class FileSelectorGUI extends JFrame {
     }
 
 
-    private void executeButton() throws IOException {
+    private void execute() throws IOException {
 
         this.magnet.setWorkdir(this.workingdirPath.getText());
         this.magnet.set_trasfer_mode(move_radio.isSelected());
