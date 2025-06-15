@@ -5,6 +5,8 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
+import src.TimestampParser;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Dictionary;
@@ -48,13 +50,21 @@ public class FileComparator {
         this.check_enabled.put(checkname, Enabled);
         this.check_results.put(checkname, false);
 
-        Boolean timecheck = (Objects.equals(checkname, DATE) || Objects.equals(checkname, MINUTE) || Objects.equals(checkname, SECOND));
+        Boolean timecheck = checkname.equals(DATE) || checkname.equals(HOUR) || checkname.equals(MINUTE) || checkname.equals(SECOND);
+
         if (timecheck & this.dates == null) {
+            this.dates = new String[this.samplefiles.length];
             for (int i = 0; i < this.samplefiles.length; i++) {
-                this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");}
+                this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");
+                if (dates[i] != null) {
+                    TimestampParser parser = new TimestampParser(dates[i]);
+                    System.out.println("Day: " + parser.getDay() + ", Month: " + parser.getMonth() + ", Year: " + parser.getYear());
+                    System.out.println("Hour: " + parser.getHour() + ", Minute: " + parser.getMinute() + ", Second: " + parser.getSecond());
+
+                }
+            }
         }
 
-        System.out.println("Date Taken detected " + this.dates[0]);
     }
 
     public void set_reference_sample(File[] sample) throws IOException {
@@ -64,7 +74,6 @@ public class FileComparator {
         this.bool_mask = new Boolean[filecount];
         this.names = new String[filecount];
         this.extensions = new String[filecount];
-        this.dates = new String[filecount];
         this.sizes = new int[filecount];
 
         for (Boolean b : this.bool_mask) b = false;
@@ -152,12 +161,12 @@ public class FileComparator {
 
     private String getExifTag (File file, String select_tag) {
 
-        try{ Metadata metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
+        try{
+            System.out.println("Reading file: " + file.getAbsolutePath());
+            Metadata metadata = ImageMetadataReader.readMetadata(file);
             for (Directory directory : metadata.getDirectories()) {
                 for (Tag tag : directory.getTags()) {
-                    System.out.println("checking tag: " + tag.getTagName() + " - " + tag.getDescription());
                     if(tag.getTagName().equals(select_tag)) return  tag.getDescription();
-
                 }//for each tag
             }//for each dir
 

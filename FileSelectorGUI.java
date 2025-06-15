@@ -74,6 +74,16 @@ public class FileSelectorGUI extends JFrame {
         panel.add(fileCountLabel);
         panel.setBorder(BorderFactory.createTitledBorder("Working Directory:"));
 
+        //when enter is pressed update fileCountLabel
+        workingdirPath.addActionListener(e -> {
+            try {
+                magnet.setWorkdir(workingdirPath.getText());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            fileCountLabel.setText(magnet.getSampleCount() + " files will be used as reference");
+        });
+
 
         return panel;
     }
@@ -83,7 +93,7 @@ public class FileSelectorGUI extends JFrame {
     private JPanel create_target_Panel() {
 
         targetPath = new JTextField(25);
-        targetPath.setText("");
+        targetPath.setText(this.read_config_file());
         this.recursiveBox = new JCheckBox("Search subdirectories");
         JButton browseButton = new JButton("Change Target");
 
@@ -102,9 +112,38 @@ public class FileSelectorGUI extends JFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 targetPath.setText(chooser.getSelectedFile().getAbsolutePath());
             }
+            //create hidden config file called .magnet_config and save selected path in it
+            this.update_config_file(chooser.getSelectedFile().getAbsolutePath());
         });
-
         return panel;
+    }
+
+    public String read_config_file() {
+        //read hidden config file called .magnet_config and return the path
+        File configFile = new File(System.getProperty("user.dir"), ".magnet_config");
+        if (configFile.exists()) {
+            try {
+                String content = new String(java.nio.file.Files.readAllBytes(configFile.toPath()));
+                return content.trim(); // Return the path without leading/trailing whitespace
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Failed to read configuration: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return ""; // Return empty string if file does not exist or an error occurs
+    }
+
+    public void update_config_file(String filepath){
+        //create hidden config file called .magnet_config and save selected path in it
+        File configFile = new File(filepath, ".magnet_config");
+        try {
+            if (!configFile.exists()) {
+                configFile.createNewFile();
+            }
+            // Write the selected path to the config file
+            java.nio.file.Files.write(configFile.toPath(), filepath.getBytes());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Failed to save configuration: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public JPanel create_transferPanel() {
@@ -160,7 +199,6 @@ public class FileSelectorGUI extends JFrame {
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionsPanel.setAlignmentX(Component.RIGHT_ALIGNMENT); // Align panel to the left
-        //optionsPanel.setBorder(BorderFactory.createTitledBorder("Settings"));
         optionsPanel.add(extension_box);
         optionsPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         optionsPanel.add(name_box);
