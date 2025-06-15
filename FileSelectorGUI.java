@@ -8,16 +8,14 @@ import java.io.IOException;
 public class FileSelectorGUI extends JFrame {
 
     Magnet magnet;
-    File[] sample;
-    private JPanel optionsPanel;
+    JTextField workingdirPath, targetPath;
 
     //settings field
-    JFormattedTextField extension_field;
-    private JCheckBox   recursiveBox, sameH, sameM, sameS;
+    JRadioButton move_radio, copy_radio;
+    private JCheckBox   recursiveBox, sameH, sameM, sameS, sameD;
     private JPanel name_box, extension_box, similar_content_box, same_content_box, time_box;
     private JLabel fileCountLabel, namesLabel, similarContentLabel;
-    JTextField workingdirPath, targetPath, samplePath;
-    JRadioButton move_radio, copy_radio;
+    JFormattedTextField extension_field;
 
     //Panels
 
@@ -61,13 +59,13 @@ public class FileSelectorGUI extends JFrame {
         setVisible(true);
     }
 
-
+ 
     private JPanel create_workingdir_Selector() {
 
         workingdirPath = new JTextField(25);
         workingdirPath.setText(System.getProperty("user.dir"));
 
-        this.fileCountLabel = new JLabel(magnet.getSampleCount() + " files detected");
+        this.fileCountLabel = new JLabel(magnet.getSampleCount() + " files will be used as reference");
 
         //layout
         JPanel panel = new JPanel(new FlowLayout());
@@ -137,9 +135,15 @@ public class FileSelectorGUI extends JFrame {
 
         JPanel timeoptions = new JPanel();
         timeoptions.setLayout(new BoxLayout(timeoptions, BoxLayout.Y_AXIS));
+        sameD = new JCheckBox("same date");
+        sameD.addActionListener(e -> {this.magnet.enable_check(magnet.DATE, sameD.isSelected());});
         sameH = new JCheckBox("same HH");
+        sameH.addActionListener(e -> {this.magnet.enable_check(magnet.HOUR, sameH.isSelected());});
         sameM = new JCheckBox("same MM");
+        sameM.addActionListener(e -> {this.magnet.enable_check(magnet.MINUTE, sameM.isSelected());});
         sameS = new JCheckBox("same SS");
+        sameS.addActionListener(e -> {this.magnet.enable_check(magnet.SECOND, sameS.isSelected());});
+        timeoptions.add(sameD);
         timeoptions.add(sameH);
         timeoptions.add(sameM);
         timeoptions.add(sameS);
@@ -147,11 +151,11 @@ public class FileSelectorGUI extends JFrame {
         JLabel sameContentLabel = new JLabel("Coming soon!");
 
         //create options
-        extension_box = this.create_option("with same extensions:", extension_field, false);
-        name_box = this.create_option("with same names:", namelist, true);
-        time_box = this.create_option("taken at same time:", timeoptions, false);
-        same_content_box = this.create_option("with same content:", similarContentLabel,false);
-        similar_content_box = this.create_option("with similar content:", sameContentLabel, false);
+        extension_box = this.create_option("with same extensions:", extension_field, false, magnet.EXTENSION );
+        name_box = this.create_option("with same names:", namelist, true, magnet.FILENAME);
+        time_box = this.create_option("taken at same time:", timeoptions, false, magnet.DATE);
+        same_content_box = this.create_option("with same content:", similarContentLabel,false,  magnet.SAMECONTENT);
+        similar_content_box = this.create_option("with similar content:", sameContentLabel, false,  magnet.SIMILARCONTENT);
 
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
@@ -171,7 +175,7 @@ public class FileSelectorGUI extends JFrame {
 
     }
 
-    private JPanel create_option(String label , Component jcomponent, Boolean enabled) {
+    private JPanel create_option(String label , Component jcomponent, Boolean enabled, String magnetoption) {
 
         JCheckBox checkbox = new JCheckBox(label);
         JPanel examples = new JPanel();
@@ -179,18 +183,18 @@ public class FileSelectorGUI extends JFrame {
         examples.add(jcomponent);
         examples.setAlignmentY(Component.TOP_ALIGNMENT);
 
-        checkbox.setSelected(false);
-        checkbox.addActionListener(e -> {
-            this.enableComponents(examples, checkbox.isSelected());
-        });
-
-
         JPanel optionComponent = new JPanel();
         optionComponent.setLayout(new BoxLayout(optionComponent, BoxLayout.X_AXIS)); // Set horizontal layout
         optionComponent.setAlignmentX(Component.RIGHT_ALIGNMENT); // Align component to the left
         optionComponent.setAlignmentY(Component.CENTER_ALIGNMENT);
         optionComponent.add(checkbox);
         optionComponent.add(examples);
+
+        checkbox.setSelected(false);
+        checkbox.addActionListener(e -> {
+            this.enableComponents(examples, checkbox.isSelected());
+            this.magnet.enable_check(magnetoption, checkbox.isSelected());
+        });
 
         this.enableComponents(examples, enabled);
         checkbox.setSelected(enabled);
@@ -212,14 +216,10 @@ public class FileSelectorGUI extends JFrame {
         this.magnet.setWorkdir(this.workingdirPath.getText());
         this.magnet.set_trasfer_mode(move_radio.isSelected());
         this.magnet.set_recursive(recursiveBox.isSelected());
+        this.magnet.setWorkdir(this.workingdirPath.getText());
+        System.out.println("Settings applied: " + this.magnet.printSettings());
 
-        if (this.sample  == null && !samplePath.getText().isEmpty()) {
-            File sample_dir = new File(samplePath.getText());
-            this.sample = sample_dir.listFiles();
-        }
-        this.magnet.set_reference_sample(this.sample);
-        this.magnet.change_settings(name_box.isEnabled(), same_content_box.isEnabled(), time_box.isEnabled(), false); //TODO link settings
-        this.magnet.attractSimilar(this.targetPath.getText());
+        //this.magnet.attractSimilar(this.targetPath.getText());
 
         JOptionPane.showMessageDialog(this, this.magnet.getOutcome(), "Completed!", JOptionPane.INFORMATION_MESSAGE);
     }

@@ -21,9 +21,17 @@ public class FileComparator {
     Boolean[] bool_mask;
 
     // Controls if checks are active or not
-    String [] checkNames = {"name", "extension", "date", "minute", "second", "same_content", "similar_content"};
-    Dictionary<String, Boolean> checks_settings = new Hashtable<>();
-    // Stores boolean results for each check
+    public String FILENAME = "name";
+    public String EXTENSION = "extension";
+    public String DATE = "date";
+    public String HOUR = "hour";
+    public String MINUTE = "minute";
+    public String SECOND = "second";
+    public String SAMECONTENT = "same_content";
+    public String SIMILARCONTENT = "similar_content";
+
+    String [] checkNames = {FILENAME, EXTENSION, DATE, HOUR, MINUTE, SECOND, SAMECONTENT, SIMILARCONTENT};
+    Dictionary<String, Boolean> check_enabled= new Hashtable<>();
     Dictionary<String, Boolean> check_results = new Hashtable<>();
 
 
@@ -31,23 +39,22 @@ public class FileComparator {
     public FileComparator() {
 
         for (String c: checkNames) {
-            this.checks_settings.put(c, false);
+            this.check_enabled.put(c, false);
             this.check_results.put(c, false);
         }
 
     }
-    public void change_settings(String name, Boolean Enabled) {
-        this.checks_settings.put(name, Enabled);
-        this.check_results.put(name, false);
+    public void enable_check(String checkname, Boolean Enabled) {
+        this.check_enabled.put(checkname, Enabled);
+        this.check_results.put(checkname, false);
 
-
-        if (name == "date" || name == "minute" || name == "second") {
+        Boolean timecheck = (Objects.equals(checkname, DATE) || Objects.equals(checkname, MINUTE) || Objects.equals(checkname, SECOND));
+        if (timecheck & this.dates == null) {
             for (int i = 0; i < this.samplefiles.length; i++) {
                 this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");}
-
         }
 
-        System.out.println(this.dates[0]);
+        System.out.println("Date Taken detected " + this.dates[0]);
     }
 
     public void set_reference_sample(File[] sample) throws IOException {
@@ -96,13 +103,12 @@ public class FileComparator {
         String name = this.separate_name(file);
         String extension = this.separate_extension(file);
 
-        if (this.checks_settings.get("name")) this.check_results.put("extension", check_filename(name));
-        if (this.checks_settings.get("extension")) this.check_results.put("extension", check_extension(name));
+        if (this.check_enabled.get("name")) this.check_results.put("extension", check_filename(name));
+        if (this.check_enabled.get("extension")) this.check_results.put("extension", check_extension(name));
 
-        for (String c : checkNames) {
-                //combine results of checks
-                output = output & check_results.get(c);
-        }
+        //combine results of checks
+        for (String c : checkNames) output = output & check_results.get(c);
+
         return output;
     }//end compare
 
@@ -137,7 +143,6 @@ public class FileComparator {
 
     private Boolean check_date(String date){
 
-
         for (String d : this.dates){
             if (d.contains(date)) return true;
         }
@@ -150,7 +155,7 @@ public class FileComparator {
         try{ Metadata metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
             for (Directory directory : metadata.getDirectories()) {
                 for (Tag tag : directory.getTags()) {
-
+                    System.out.println("checking tag: " + tag.getTagName() + " - " + tag.getDescription());
                     if(tag.getTagName().equals(select_tag)) return  tag.getDescription();
 
                 }//for each tag
