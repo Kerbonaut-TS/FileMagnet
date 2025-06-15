@@ -1,4 +1,5 @@
 package src;
+import java.util.*;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
@@ -6,7 +7,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.stream.Stream;
 
 
@@ -19,27 +20,34 @@ public class FileComparator {
     String[] dates;
     Boolean[] bool_mask;
 
-    Boolean[] checks = {false, false, false ,false};
-    int NAME_CHECK = 0;
-    int EXT_CHECK = 1;
-    int DATE_CHECK = 2;
-    int SIZE_CHECK = 3;
+    // Controls if checks are active or not
+    String [] checkNames = {"name", "extension", "date", "minute", "second", "same_content", "similar_content"};
+    Dictionary<String, Boolean> checks_settings = new Hashtable<>();
+    // Stores boolean results for each check
+    Dictionary<String, Boolean> check_results = new Hashtable<>();
+
 
 
     public FileComparator() {
 
+        for (String c: checkNames) {
+            this.checks_settings.put(c, false);
+            this.check_results.put(c, false);
+        }
 
     }
-    public void change_settings(Boolean name, Boolean extension, Boolean date, Boolean size) {
-        this.checks[NAME_CHECK] = name;
-        this.checks[EXT_CHECK] = extension;
-        this.checks[DATE_CHECK] = date;
-        this.checks[SIZE_CHECK] = size;
+    public void change_settings(String name, Boolean Enabled) {
+        this.checks_settings.put(name, Enabled);
+        this.check_results.put(name, false);
 
-        if (date){
+
+        if (name == "date" || name == "minute" || name == "second") {
             for (int i = 0; i < this.samplefiles.length; i++) {
                 this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");}
+
         }
+
+        System.out.println(this.dates[0]);
     }
 
     public void set_reference_sample(File[] sample) throws IOException {
@@ -88,15 +96,12 @@ public class FileComparator {
         String name = this.separate_name(file);
         String extension = this.separate_extension(file);
 
-        Boolean [] results = new Boolean[this.checks.length] ;
-        for (Boolean b : results) b = false;
-        if (checks[NAME_CHECK]) results[NAME_CHECK] = this.check_name(name);
-        if (checks[EXT_CHECK])  results[EXT_CHECK] =  this.check_extension(name);
+        if (this.checks_settings.get("name")) this.check_results.put("extension", check_filename(name));
+        if (this.checks_settings.get("extension")) this.check_results.put("extension", check_extension(name));
 
-        for (int i = 0; i<this.checks.length; i++) {
-            if (this.checks[i]) {
-                output = output & results[i];
-            }
+        for (String c : checkNames) {
+                //combine results of checks
+                output = output & check_results.get(c);
         }
         return output;
     }//end compare
@@ -114,7 +119,7 @@ public class FileComparator {
         return file.getName().substring(dotIndex, filename.length());
     }
 
-    private Boolean check_name(String name){
+    private Boolean check_filename(String name){
         for (String n : this.names){
             if (n.contains(name)) return true;
         }
