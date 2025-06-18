@@ -134,7 +134,7 @@ public class FileSelectorGUI extends JFrame {
 
     public void update_config_file(String filepath){
         //create hidden config file called .magnet_config and save selected path in it
-        File configFile = new File(filepath, ".magnet_config");
+        File configFile = new File(this.workingdirPath.getText() , ".magnet_config");
         try {
             if (!configFile.exists()) {
                 configFile.createNewFile();
@@ -257,7 +257,7 @@ public class FileSelectorGUI extends JFrame {
         this.magnet.setWorkdir(this.workingdirPath.getText());
         System.out.println("Settings applied: " + this.magnet.printSettings());
 
-        //this.magnet.attractSimilar(this.targetPath.getText());
+        this.magnet.attractSimilar(this.targetPath.getText());
 
         JOptionPane.showMessageDialog(this, this.magnet.getOutcome(), "Completed!", JOptionPane.INFORMATION_MESSAGE);
     }

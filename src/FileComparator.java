@@ -23,14 +23,14 @@ public class FileComparator {
     Boolean[] bool_mask;
 
     // Controls if checks are active or not
-    public String FILENAME = "name";
-    public String EXTENSION = "extension";
-    public String DATE = "date";
-    public String HOUR = "hour";
-    public String MINUTE = "minute";
-    public String SECOND = "second";
-    public String SAMECONTENT = "same_content";
-    public String SIMILARCONTENT = "similar_content";
+    public final String FILENAME = "name";
+    public final String EXTENSION = "extension";
+    public final String DATE = "date";
+    public final String HOUR = "hour";
+    public final String MINUTE = "minute";
+    public final String SECOND = "second";
+    public final String SAMECONTENT = "same_content";
+    public final String SIMILARCONTENT = "similar_content";
 
     String [] checkNames = {FILENAME, EXTENSION, DATE, HOUR, MINUTE, SECOND, SAMECONTENT, SIMILARCONTENT};
     Dictionary<String, Boolean> check_enabled= new Hashtable<>();
@@ -56,12 +56,7 @@ public class FileComparator {
             this.dates = new String[this.samplefiles.length];
             for (int i = 0; i < this.samplefiles.length; i++) {
                 this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");
-                if (dates[i] != null) {
-                    TimestampParser parser = new TimestampParser(dates[i]);
-                    System.out.println("Day: " + parser.getDay() + ", Month: " + parser.getMonth() + ", Year: " + parser.getYear());
-                    System.out.println("Hour: " + parser.getHour() + ", Minute: " + parser.getMinute() + ", Second: " + parser.getSecond());
 
-                }
             }
         }
 
@@ -111,9 +106,15 @@ public class FileComparator {
         //file to compare
         String name = this.separate_name(file);
         String extension = this.separate_extension(file);
+        String time = this.getExifTag(file, "Date/Time Original");
 
-        if (this.check_enabled.get("name")) this.check_results.put("extension", check_filename(name));
-        if (this.check_enabled.get("extension")) this.check_results.put("extension", check_extension(name));
+        if (this.check_enabled.get(FILENAME))   this.check_results.put(FILENAME, check_filename(name));
+        if (this.check_enabled.get(EXTENSION))  this.check_results.put(EXTENSION, check_extension(name));
+        if (this.check_enabled.get(DATE))       this.check_results.put(DATE, check_time(time, DATE));
+        if (this.check_enabled.get(HOUR))       this.check_results.put(HOUR, check_time(time,HOUR));
+        if (this.check_enabled.get(MINUTE))     this.check_results.put(MINUTE, check_time(time,MINUTE));
+        if (this.check_enabled.get(SECOND))     this.check_results.put(SECOND, check_time(time,SECOND));
+
 
         //combine results of checks
         for (String c : checkNames) output = output & check_results.get(c);
@@ -141,8 +142,6 @@ public class FileComparator {
         return false;
     }
 
-
-
     private Boolean check_extension(String extension){
         for (String n : this.extensions){
             if (n.contains(extension)) return true;
@@ -150,12 +149,32 @@ public class FileComparator {
         return false;
     }
 
-    private Boolean check_date(String date){
+    private Boolean check_time(String timestamp, String type) {
 
-        for (String d : this.dates){
-            if (d.contains(date)) return true;
+        if (timestamp == null) {
+            return false;
+        } else {
+            TimestampParser fp1 = new TimestampParser(timestamp);
+            for (String t : this.dates) {
+                if (t == null) continue; // skip null timestamps
+                TimestampParser fp2 = new TimestampParser(t);
+                Boolean samedate = (fp1.getDay() == fp2.getDay()) && (fp1.getMonth() == fp2.getMonth()) && (fp1.getYear() == fp2.getYear());
+
+                switch (type) {
+                    case DATE:
+                        return samedate;
+                    case HOUR:
+                        return samedate && (fp1.getHour() == fp2.getHour());
+                    case MINUTE:
+                        return samedate && (fp1.getHour() == fp2.getHour()) && (fp1.getMinute() == fp2.getMinute());
+                    case SECOND:
+                        return samedate && (fp1.getHour() == fp2.getHour()) && (fp1.getMinute() == fp2.getMinute()) && (fp1.getSecond() == fp2.getSecond());
+                    default:
+                        return false;
+                }//end switch
+            }//end for
         }
-        return false;
+        return null;
     }
 
 
