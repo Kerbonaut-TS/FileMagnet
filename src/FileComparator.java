@@ -49,17 +49,6 @@ public class FileComparator {
     public void enable_check(String checkname, Boolean Enabled) {
         this.check_enabled.put(checkname, Enabled);
         this.check_results.put(checkname, false);
-
-        Boolean timecheck = checkname.equals(DATE) || checkname.equals(HOUR) || checkname.equals(MINUTE) || checkname.equals(SECOND);
-
-        if (timecheck & this.dates == null) {
-            this.dates = new String[this.samplefiles.length];
-            for (int i = 0; i < this.samplefiles.length; i++) {
-                this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");
-
-            }
-        }
-
     }
 
     public void set_reference_sample(File[] sample) throws IOException {
@@ -70,6 +59,7 @@ public class FileComparator {
         this.names = new String[filecount];
         this.extensions = new String[filecount];
         this.sizes = new int[filecount];
+        this.dates = new String[filecount];
 
         for (Boolean b : this.bool_mask) b = false;
 
@@ -80,6 +70,7 @@ public class FileComparator {
             this.names[i] = this.separate_name(this.samplefiles[i]);
             this.extensions[i] = this.separate_extension(this.samplefiles[i]);
             this.sizes[i] = (int) this.samplefiles[i].length();
+            this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");
         }
 
     }
@@ -151,11 +142,11 @@ public class FileComparator {
 
     private Boolean check_time(String timestamp, String type) {
 
-        if (timestamp == null) {
-            return false;
-        } else {
-            TimestampParser fp1 = new TimestampParser(timestamp);
+        TimestampParser fp1 = new TimestampParser(timestamp);
+        if (fp1.isValid) {
+            System.out.println("Comparing timestamp: " + timestamp +"with ");
             for (String t : this.dates) {
+                System.out.println(" - " + t);
                 if (t == null) continue; // skip null timestamps
                 TimestampParser fp2 = new TimestampParser(t);
                 Boolean samedate = (fp1.getDay() == fp2.getDay()) && (fp1.getMonth() == fp2.getMonth()) && (fp1.getYear() == fp2.getYear());
@@ -173,8 +164,8 @@ public class FileComparator {
                         return false;
                 }//end switch
             }//end for
-        }
-        return null;
+         }
+        return false;
     }
 
 
@@ -189,7 +180,7 @@ public class FileComparator {
                 }//for each tag
             }//for each dir
 
-        } catch (Throwable e) {e.printStackTrace();}
+        } catch (Throwable e) {System.out.println(">Can't read Exif");}
 
         return null;
 

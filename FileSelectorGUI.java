@@ -257,7 +257,7 @@ public class FileSelectorGUI extends JFrame {
         this.magnet.setWorkdir(this.workingdirPath.getText());
         System.out.println("Settings applied: " + this.magnet.printSettings());
 
-        this.magnet.attractSimilar(this.targetPath.getText());
+        this.magnet.attract(this.targetPath.getText());
 
         JOptionPane.showMessageDialog(this, this.magnet.getOutcome(), "Completed!", JOptionPane.INFORMATION_MESSAGE);
     }

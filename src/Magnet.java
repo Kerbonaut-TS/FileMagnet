@@ -9,7 +9,6 @@ public class Magnet extends FileComparator{
     // A magnet is a file comparator that can move or copy files and has additional settings
     File workdir;
     Boolean move = false, recursive = false;
-    String ext_filter;
 
     static int MODE_COPY = 0;
     static int MODE_MOVE = 1;
@@ -26,7 +25,6 @@ public class Magnet extends FileComparator{
         this.workdir = new File(workingDirectory);
         this.set_reference_sample(this.workdir.listFiles());
     }
-    public void set_extension_filter(String ext_filter){this.ext_filter = ext_filter;}
     public void set_recursive(Boolean recursive) {this.recursive = recursive;}
     public void set_trasfer_mode(Boolean move) {
         this.move = move;
@@ -54,29 +52,7 @@ public class Magnet extends FileComparator{
         return settings.toString();
     }
 
-    public void attract_extension(String targetDirectory) throws IOException {
-
-        this.init_counters();
-        File[] complete_filelist = new File(targetDirectory).listFiles();
-        File[] targetFiles = FileComparator.searchFiles(complete_filelist, this.recursive);
-
-        for (File f : targetFiles) {
-
-            System.out.println("Processing file: " + f.getName());
-            String ext  = super.separate_extension(f);
-            if(ext.contains(this.ext_filter)) {
-                System.out.print(" -- match found");
-                this.transfer(f, this.move ? Magnet.MODE_MOVE : Magnet.MODE_COPY);
-                this.count_transferred++;
-
-            }
-        }
-
-    }
-
-
-
-    public void attractSimilar(String targetDirectory) throws IOException {
+    public void attract(String targetDirectory) throws IOException {
         this.init_counters();
         File[] complete_filelist = new File(targetDirectory).listFiles();
         File[] targetFiles = FileComparator.searchFiles(complete_filelist, this.recursive);
