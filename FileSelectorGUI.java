@@ -213,7 +213,7 @@ public class FileSelectorGUI extends JFrame {
 
     }
 
-    private JPanel create_option(String label , Component jcomponent, Boolean enabled, String magnetoption) {
+    private JPanel create_option(String label , Component jcomponent, Boolean defaultEnabled, String magnetoption) {
 
         JCheckBox checkbox = new JCheckBox(label);
         JPanel examples = new JPanel();
@@ -234,8 +234,9 @@ public class FileSelectorGUI extends JFrame {
             this.magnet.enable_check(magnetoption, checkbox.isSelected());
         });
 
-        this.enableComponents(examples, enabled);
-        checkbox.setSelected(enabled);
+        this.enableComponents(examples, defaultEnabled);
+        checkbox.setSelected(defaultEnabled);
+        this.magnet.enable_check(magnetoption, defaultEnabled);
 
         return optionComponent;
     }

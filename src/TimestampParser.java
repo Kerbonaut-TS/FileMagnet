@@ -20,29 +20,31 @@ public class TimestampParser {
     };
 
     public TimestampParser(String timestamp) {
+        isValid = parseTimestamp(timestamp);
 
-        //try to parse the string timestamp with a list of possible formats
-        if (timestamp == null || timestamp.isEmpty()) {
-            isValid = false;
-        }
-        for (String format : formats) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat(format);
-                this.timestamp = sdf.parse(timestamp);
-                isValid = true;
-                System.out.println("Valid timestamp: " + this.timestamp + " with format: " + format);
-            } catch (Exception e) {
-                // Continue to the next format if parsing fails
-                System.out.println("Invalid timestamp: " + timestamp );
-            }
-        }
-        if(isValid && this.timestamp != null) {
+        if(isValid) {
             this.calendar = Calendar.getInstance();
             calendar.setTime(this.timestamp);
         }
-
-
     }
+
+    public boolean parseTimestamp( String timestamp) {
+        //try to parse the string timestamp with a list of possible formats
+        if (timestamp == null || timestamp.isEmpty()) {
+            return false;
+        }else {
+            for (String format : this.formats) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat(format);
+                    this.timestamp = sdf.parse(timestamp);
+                    System.out.println("Valid timestamp: " + this.timestamp);
+                    return true;
+                } catch (Exception e) {System.out.println("Invalid timestamp: " + timestamp);}
+            }//end for : formats
+        }//end else
+
+        return false;
+    }//end
 
     public int getDay() {
         return calendar.get(Calendar.DAY_OF_MONTH);

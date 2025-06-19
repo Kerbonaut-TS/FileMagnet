@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class FileComparator {
 
     File[]  samplefiles;
-    String[] names;
+    String[] filenames;
     String[] extensions;
     int[]  sizes;
     String[] dates;
@@ -32,7 +32,7 @@ public class FileComparator {
     public final String SAMECONTENT = "same_content";
     public final String SIMILARCONTENT = "similar_content";
 
-    String [] checkNames = {FILENAME, EXTENSION, DATE, HOUR, MINUTE, SECOND, SAMECONTENT, SIMILARCONTENT};
+    String [] checkList = {FILENAME, EXTENSION, DATE, HOUR, MINUTE, SECOND, SAMECONTENT, SIMILARCONTENT};
     Dictionary<String, Boolean> check_enabled= new Hashtable<>();
     Dictionary<String, Boolean> check_results = new Hashtable<>();
 
@@ -40,14 +40,14 @@ public class FileComparator {
 
     public FileComparator() {
 
-        for (String c: checkNames) {
+        for (String c: checkList) {
             this.check_enabled.put(c, false);
             this.check_results.put(c, false);
         }
 
     }
-    public void enable_check(String checkname, Boolean Enabled) {
-        this.check_enabled.put(checkname, Enabled);
+    public void enable_check(String checkname, Boolean enabled) {
+        this.check_enabled.put(checkname, enabled);
         this.check_results.put(checkname, false);
     }
 
@@ -56,7 +56,7 @@ public class FileComparator {
         this.samplefiles = FileComparator.searchFiles(sample, false);
         int filecount = this.samplefiles.length;
         this.bool_mask = new Boolean[filecount];
-        this.names = new String[filecount];
+        this.filenames = new String[filecount];
         this.extensions = new String[filecount];
         this.sizes = new int[filecount];
         this.dates = new String[filecount];
@@ -67,7 +67,7 @@ public class FileComparator {
             String filename = this.samplefiles[i].getName();
             System.out.println("analyzing sample: " + filename);
             int dotIndex = filename.lastIndexOf('.');
-            this.names[i] = this.separate_name(this.samplefiles[i]);
+            this.filenames[i] = this.separate_filename(this.samplefiles[i]);
             this.extensions[i] = this.separate_extension(this.samplefiles[i]);
             this.sizes[i] = (int) this.samplefiles[i].length();
             this.dates[i] = this.getExifTag(this.samplefiles[i], "Date/Time Original");
@@ -78,12 +78,12 @@ public class FileComparator {
     public String getNames( int limit){
         StringBuilder sb = new StringBuilder();
         int count = 0;
-        for (String name : this.names) {
+        for (String name : this.filenames) {
             sb.append(name).append(" ; ");
             count++;
             if (count >= limit) break;
         }
-        int residual = this.names.length - count;
+        int residual = this.filenames.length - count;
         sb.append(".. and "+residual+" more");
         return sb.toString();
     }
@@ -95,26 +95,27 @@ public class FileComparator {
         Boolean output = true;
 
         //file to compare
-        String name = this.separate_name(file);
+        String filename = this.separate_filename(file);
         String extension = this.separate_extension(file);
         String time = this.getExifTag(file, "Date/Time Original");
 
-        if (this.check_enabled.get(FILENAME))   this.check_results.put(FILENAME, check_filename(name));
-        if (this.check_enabled.get(EXTENSION))  this.check_results.put(EXTENSION, check_extension(name));
+        if (this.check_enabled.get(FILENAME))   this.check_results.put(FILENAME, check_filename(filename));
+        if (this.check_enabled.get(EXTENSION))  this.check_results.put(EXTENSION, check_extension(extension));
         if (this.check_enabled.get(DATE))       this.check_results.put(DATE, check_time(time, DATE));
         if (this.check_enabled.get(HOUR))       this.check_results.put(HOUR, check_time(time,HOUR));
         if (this.check_enabled.get(MINUTE))     this.check_results.put(MINUTE, check_time(time,MINUTE));
         if (this.check_enabled.get(SECOND))     this.check_results.put(SECOND, check_time(time,SECOND));
 
-
         //combine results of checks
-        for (String c : checkNames) output = output & check_results.get(c);
-
+        for (String c : checkList) {
+            if (this.check_enabled.get(c)) output = output & check_results.get(c);
+        }
+        System.out.println(" - Result: " + output);
         return output;
     }//end compare
 
 
-    public String separate_name(File file){
+    public String separate_filename(File file){
         String filename = file.getName();
         int dotIndex = filename.lastIndexOf('.');
         return file.getName().substring(0, dotIndex);
@@ -127,8 +128,10 @@ public class FileComparator {
     }
 
     private Boolean check_filename(String name){
-        for (String n : this.names){
-            if (n.contains(name)) return true;
+        for (String n : this.filenames){
+            if (n.equals(name)) {
+                System.out.println(n + " == " + name + " : true");
+            }
         }
         return false;
     }
@@ -144,7 +147,6 @@ public class FileComparator {
 
         TimestampParser fp1 = new TimestampParser(timestamp);
         if (fp1.isValid) {
-            System.out.println("Comparing timestamp: " + timestamp +"with ");
             for (String t : this.dates) {
                 System.out.println(" - " + t);
                 if (t == null) continue; // skip null timestamps
@@ -172,7 +174,6 @@ public class FileComparator {
     private String getExifTag (File file, String select_tag) {
 
         try{
-            System.out.println("Reading file: " + file.getAbsolutePath());
             Metadata metadata = ImageMetadataReader.readMetadata(file);
             for (Directory directory : metadata.getDirectories()) {
                 for (Tag tag : directory.getTags()) {
@@ -180,7 +181,7 @@ public class FileComparator {
                 }//for each tag
             }//for each dir
 
-        } catch (Throwable e) {System.out.println(">Can't read Exif");}
+        } catch (Throwable e) {System.out.println(">No Exif data");}
 
         return null;
 
