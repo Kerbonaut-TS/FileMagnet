@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-public class FileSelectorGUI extends JFrame {
+public class ImageMagnetGUI extends JFrame {
 
     Magnet magnet;
     JTextField workingdirPath, targetPath;
@@ -16,11 +16,11 @@ public class FileSelectorGUI extends JFrame {
     private JPanel name_box, extension_box, similar_content_box, same_content_box, time_box;
     private JLabel fileCountLabel, namesLabel, similarContentLabel;
     JFormattedTextField extension_field;
-
+    JList<String> namelist;
     //Panels
 
 
-    public FileSelectorGUI() throws IOException {
+    public ImageMagnetGUI() throws IOException {
 
         super("File Magnet v0.9");
         this.magnet = new Magnet(System.getProperty("user.dir"));
@@ -78,10 +78,10 @@ public class FileSelectorGUI extends JFrame {
         workingdirPath.addActionListener(e -> {
             try {
                 magnet.setWorkdir(workingdirPath.getText());
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            } catch (IOException ex) {throw new RuntimeException(ex);}
             fileCountLabel.setText(magnet.getSampleCount() + " files will be used as reference");
+            namelist.setListData(magnet.getFileNames(4).split(";"));
+
         });
 
 
@@ -167,9 +167,9 @@ public class FileSelectorGUI extends JFrame {
         //init components in this section
         extension_field = new JFormattedTextField();
         extension_field.setColumns(10);
-        extension_field.setText(".JPG; .JPEG");
+        extension_field.setText(this.magnet.getExtensions());
         //create a vertical list
-        JList<String> namelist = new JList<>(this.magnet.getNames(4).split(";"));
+        namelist = new JList<>(this.magnet.getFileNames(4).split(";"));
         namelist.setLayoutOrientation(JList.VERTICAL);
 
         JPanel timeoptions = new JPanel();
@@ -267,7 +267,7 @@ public class FileSelectorGUI extends JFrame {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                new FileSelectorGUI();
+                new ImageMagnetGUI();
             } catch (IOException e) {
                 e.printStackTrace(); // Log the exception or handle it appropriately
                 JOptionPane.showMessageDialog(null, "Failed to initialize the GUI: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

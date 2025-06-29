@@ -75,7 +75,15 @@ public class FileComparator {
 
     }
 
-    public String getNames( int limit){
+    public String getExtensions() {
+        StringBuilder sb = new StringBuilder();
+        for (String name : this.extensions) {
+            sb.append(name).append(" ; ");
+        }
+        return sb.toString();
+    }
+
+    public String getFileNames( int limit){
         StringBuilder sb = new StringBuilder();
         int count = 0;
         for (String name : this.filenames) {
@@ -92,12 +100,15 @@ public class FileComparator {
         return this.samplefiles.length;
     }
     public Boolean compare(File file){
-        Boolean output = true;
+        //if at least one check is enabled return true else false
+        Boolean output = false;
+        for (String c : checkList)  output = output | this.check_enabled.get(c);
 
         //file to compare
         String filename = this.separate_filename(file);
         String extension = this.separate_extension(file);
         String time = this.getExifTag(file, "Date/Time Original");
+
 
         if (this.check_enabled.get(FILENAME))   this.check_results.put(FILENAME, check_filename(filename));
         if (this.check_enabled.get(EXTENSION))  this.check_results.put(EXTENSION, check_extension(extension));
@@ -110,7 +121,7 @@ public class FileComparator {
         for (String c : checkList) {
             if (this.check_enabled.get(c)) output = output & check_results.get(c);
         }
-        System.out.println(" - Result: " + output);
+        System.out.println(" - Transfer: " + output);
         return output;
     }//end compare
 
@@ -131,6 +142,7 @@ public class FileComparator {
         for (String n : this.filenames){
             if (n.equals(name)) {
                 System.out.println(n + " == " + name + " : true");
+                return true;
             }
         }
         return false;
@@ -210,13 +222,13 @@ public class FileComparator {
         ignore_count = 0;
         i = 0;
 
-        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".")) ignore_count++;
+        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("FileMagnet")) ignore_count++;
 
         int file_count = fileList.length - ignore_count;
         File[] newList = new File[file_count];
 
         for (File f : fileList) {
-            if (!f.isDirectory() &&  !f.isHidden() && f.getName().contains(".")) {
+            if (!(f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("FileMagnet"))) {
                 newList[i] = f;
                 i++;
             }
