@@ -22,6 +22,8 @@ public class FileComparator {
     String[] dates;
     Boolean[] bool_mask;
 
+    String logpath = System.getProperty("user.dir");
+
     // Controls if checks are active or not
     public final String FILENAME = "name";
     public final String EXTENSION = "extension";
@@ -65,7 +67,6 @@ public class FileComparator {
 
         for (int i = 0; i < filecount; i++) {
             String filename = this.samplefiles[i].getName();
-            System.out.println("analyzing sample: " + filename);
             int dotIndex = filename.lastIndexOf('.');
             this.filenames[i] = this.separate_filename(this.samplefiles[i]);
             this.extensions[i] = this.separate_extension(this.samplefiles[i]);
@@ -77,18 +78,43 @@ public class FileComparator {
 
     public String getExtensions() {
         StringBuilder sb = new StringBuilder();
-        for (String name : this.extensions) {
+        Enumeration<String> keys = this.getUniqueExtensions();
+        while (keys.hasMoreElements()) {
+            String name = keys.nextElement();
             sb.append(name).append(" ; ");
         }
         return sb.toString();
+    }
+
+    public Enumeration<String> getUniqueExtensions() {
+        Dictionary<String , Boolean> uniqueExtensions = new Hashtable<>();
+        for (String e : this.extensions) {
+                uniqueExtensions.put(e, true);
+        }
+        return uniqueExtensions.keys();
+    }
+
+    public void setExtentions (String extensions) {
+        if (extensions == null || extensions.isEmpty()) {
+            this.extensions = new String[0];
+            return;
+        }else{
+            String[] extArray = extensions.split(";");
+            for (int i = 0; i < extArray.length; i++) {
+                extArray[i] = extArray[i].trim();
+            }
+            this.extensions = extArray;
+        }
     }
 
     public String getFileNames( int limit){
         StringBuilder sb = new StringBuilder();
         int count = 0;
         for (String name : this.filenames) {
-            sb.append(name).append(" ; ");
-            count++;
+            if(name != null & name.length() > 1) {
+                sb.append(name).append(" ; ");
+                count++;
+            }
             if (count >= limit) break;
         }
         int residual = this.filenames.length - count;
@@ -99,7 +125,7 @@ public class FileComparator {
     public int getSampleCount() {
         return this.samplefiles.length;
     }
-    public Boolean compare(File file){
+    public Boolean compare(File file) throws IOException {
         //if at least one check is enabled return true else false
         Boolean output = false;
         for (String c : checkList)  output = output | this.check_enabled.get(c);
@@ -109,7 +135,7 @@ public class FileComparator {
         String extension = this.separate_extension(file);
         String time = this.getExifTag(file, "Date/Time Original");
 
-
+        Utilities.write_log(logpath, "=== Comparing... " + file.getName() + "====");
         if (this.check_enabled.get(FILENAME))   this.check_results.put(FILENAME, check_filename(filename));
         if (this.check_enabled.get(EXTENSION))  this.check_results.put(EXTENSION, check_extension(extension));
         if (this.check_enabled.get(DATE))       this.check_results.put(DATE, check_time(time, DATE));
@@ -119,9 +145,12 @@ public class FileComparator {
 
         //combine results of checks
         for (String c : checkList) {
-            if (this.check_enabled.get(c)) output = output & check_results.get(c);
+            if (this.check_enabled.get(c)){
+                output = output & check_results.get(c);
+                Utilities.write_log(logpath, " - " + c + ": " + this.check_results.get(c));
+            }
+
         }
-        System.out.println(" - Transfer: " + output);
         return output;
     }//end compare
 
@@ -129,7 +158,11 @@ public class FileComparator {
     public String separate_filename(File file){
         String filename = file.getName();
         int dotIndex = filename.lastIndexOf('.');
-        return file.getName().substring(0, dotIndex);
+        if (dotIndex == -1) {
+            return filename; // No extension found, return the full name
+        }else{
+            return file.getName().substring(0, dotIndex);
+        }
     }
 
     public String separate_extension(File file) {
@@ -149,36 +182,43 @@ public class FileComparator {
     }
 
     private Boolean check_extension(String extension){
-        for (String n : this.extensions){
-            if (n.contains(extension)) return true;
+        Enumeration<String> unique_extentions = this.getUniqueExtensions();
+        while (unique_extentions.hasMoreElements()) {
+            String ext = unique_extentions.nextElement();
+            if (ext.contains(extension)) return true;
         }
         return false;
     }
 
-    private Boolean check_time(String timestamp, String type) {
+    private Boolean check_time(String timestamp, String type) throws IOException {
 
         TimestampParser fp1 = new TimestampParser(timestamp);
         if (fp1.isValid) {
             for (String t : this.dates) {
-                System.out.println(" - " + t);
-                if (t == null) continue; // skip null timestamps
+                if (t == null) continue;
                 TimestampParser fp2 = new TimestampParser(t);
                 Boolean samedate = (fp1.getDay() == fp2.getDay()) && (fp1.getMonth() == fp2.getMonth()) && (fp1.getYear() == fp2.getYear());
+                Boolean result = false;
 
-                switch (type) {
-                    case DATE:
-                        return samedate;
-                    case HOUR:
-                        return samedate && (fp1.getHour() == fp2.getHour());
-                    case MINUTE:
-                        return samedate && (fp1.getHour() == fp2.getHour()) && (fp1.getMinute() == fp2.getMinute());
-                    case SECOND:
-                        return samedate && (fp1.getHour() == fp2.getHour()) && (fp1.getMinute() == fp2.getMinute()) && (fp1.getSecond() == fp2.getSecond());
-                    default:
-                        return false;
-                }//end switch
-            }//end for
-         }
+                if (type.equals(DATE)) {
+                    result = samedate;
+                } else if (type.equals(HOUR)) {
+                    result = fp1.getHour() == fp2.getHour();
+                } else if (type.equals(MINUTE)) {
+                    result = fp1.getMinute() == fp2.getMinute();
+                } else if (type.equals(SECOND)) {
+                    result = fp1.getSecond() == fp2.getSecond();
+                } else {
+                    result = false;
+                }
+                if (result == true) {
+                    return true;
+                }
+
+            }
+        }else{
+            Utilities.write_log(logpath, timestamp + " is not valid");
+        }
         return false;
     }
 

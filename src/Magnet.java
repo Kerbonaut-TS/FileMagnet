@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 public class Magnet extends FileComparator{
-    // A magnet is a file comparator that can move or copy files and has additional settings
+    // A magnet is a FileComparator that in addition can move or copy files
     File workdir;
     Boolean move = false, recursive = false;
 
@@ -22,6 +22,8 @@ public class Magnet extends FileComparator{
     }
 
     public void setWorkdir(String workingDirectory) throws IOException {
+        //The working directory is the directory where files will be copied or moved to.
+        // the content of this directory is used as a reference sample for the files that will be transferred
         this.workdir = new File(workingDirectory);
         this.set_reference_sample(this.workdir.listFiles());
     }
@@ -36,21 +38,6 @@ public class Magnet extends FileComparator{
         this.count_transferred = 0;
     }
 
-    public String printSettings() {
-        StringBuilder settings = new StringBuilder();
-        settings.append("Workdir: " + this.workdir.getAbsolutePath() + "\n");
-        settings.append("Transfer mode: " + (this.move ? "Move" : "Copy") + "\n");
-        settings.append("Recursive: " + this.recursive + "\n");
-        settings.append("CHECKS ===============================\n");
-        settings.append("filename check: " + this.check_enabled.get(FILENAME) + "\n");
-        settings.append("Extension check: " + this.check_enabled.get(EXTENSION) + "\n");
-        settings.append("Date check: " + this.check_enabled.get(DATE) + "\n");
-        settings.append("Hour check: " + this.check_enabled.get(HOUR) + "\n");
-        settings.append("Minute check: " + this.check_enabled.get(MINUTE) + "\n");
-        settings.append("Second check: " + this.check_enabled.get(SECOND) + "\n");
-
-        return settings.toString();
-    }
 
     public void attract(String targetDirectory) throws IOException {
         this.init_counters();
@@ -58,10 +45,8 @@ public class Magnet extends FileComparator{
         File[] targetFiles = FileComparator.searchFiles(complete_filelist, this.recursive);
 
         for (File f : targetFiles) {
-            System.out.println("Comparing file: " + f.getName());
             Boolean similar = super.compare(f);
             if(similar){
-                System.out.print(" -- match found");
                 Boolean trasferred = this.transfer(f, this.move ? Magnet.MODE_MOVE : Magnet.MODE_COPY);
                 if(trasferred) this.count_transferred++;
             }
@@ -94,6 +79,22 @@ public class Magnet extends FileComparator{
         outcome += "Transferred " + this.count_transferred + " files\n";
         return outcome;
      }
+
+    public String printSettings() {
+        StringBuilder settings = new StringBuilder();
+        settings.append("Workdir: " + this.workdir.getAbsolutePath() + "\n");
+        settings.append("Transfer mode: " + (this.move ? "Move" : "Copy") + "\n");
+        settings.append("Recursive: " + this.recursive + "\n");
+        settings.append("CHECKS ===============================\n");
+        settings.append("filename check: " + this.check_enabled.get(FILENAME) + "\n");
+        settings.append("Extension check: " + this.check_enabled.get(EXTENSION) + "\n");
+        settings.append("Date check: " + this.check_enabled.get(DATE) + "\n");
+        settings.append("Hour check: " + this.check_enabled.get(HOUR) + "\n");
+        settings.append("Minute check: " + this.check_enabled.get(MINUTE) + "\n");
+        settings.append("Second check: " + this.check_enabled.get(SECOND) + "\n");
+
+        return settings.toString();
+    }
 
 
 }

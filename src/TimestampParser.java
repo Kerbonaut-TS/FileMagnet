@@ -20,7 +20,7 @@ public class TimestampParser {
     };
 
     public TimestampParser(String timestamp) {
-        isValid = parseTimestamp(timestamp);
+        this.isValid = parseTimestamp(timestamp);
 
         if(isValid) {
             this.calendar = Calendar.getInstance();
@@ -37,7 +37,6 @@ public class TimestampParser {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat(format);
                     this.timestamp = sdf.parse(timestamp);
-                    System.out.println("Valid timestamp: " + this.timestamp);
                     return true;
                 } catch (Exception e) {System.out.println("Invalid timestamp: " + timestamp);}
             }//end for : formats

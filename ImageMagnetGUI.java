@@ -1,4 +1,6 @@
 import src.Magnet;
+import src.Utilities;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -22,7 +24,7 @@ public class ImageMagnetGUI extends JFrame {
 
     public ImageMagnetGUI() throws IOException {
 
-        super("File Magnet v0.9");
+        super("File Magnet v0.92");
         this.magnet = new Magnet(System.getProperty("user.dir"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(360, 800);
@@ -93,7 +95,7 @@ public class ImageMagnetGUI extends JFrame {
     private JPanel create_target_Panel() {
 
         targetPath = new JTextField(25);
-        targetPath.setText(this.read_config_file());
+        targetPath.setText(Utilities.read_config_file());
         this.recursiveBox = new JCheckBox("Search subdirectories");
         JButton browseButton = new JButton("Change Target");
 
@@ -113,38 +115,12 @@ public class ImageMagnetGUI extends JFrame {
                 targetPath.setText(chooser.getSelectedFile().getAbsolutePath());
             }
             //create hidden config file called .magnet_config and save selected path in it
-            this.update_config_file(chooser.getSelectedFile().getAbsolutePath());
+            Utilities.update_config_file(this.workingdirPath.getText(), chooser.getSelectedFile().getAbsolutePath());
         });
         return panel;
     }
 
-    public String read_config_file() {
-        //read hidden config file called .magnet_config and return the path
-        File configFile = new File(System.getProperty("user.dir"), ".magnet_config");
-        if (configFile.exists()) {
-            try {
-                String content = new String(java.nio.file.Files.readAllBytes(configFile.toPath()));
-                return content.trim(); // Return the path without leading/trailing whitespace
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to read configuration: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        return ""; // Return empty string if file does not exist or an error occurs
-    }
 
-    public void update_config_file(String filepath){
-        //create hidden config file called .magnet_config and save selected path in it
-        File configFile = new File(this.workingdirPath.getText() , ".magnet_config");
-        try {
-            if (!configFile.exists()) {
-                configFile.createNewFile();
-            }
-            // Write the selected path to the config file
-            java.nio.file.Files.write(configFile.toPath(), filepath.getBytes());
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Failed to save configuration: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
     public JPanel create_transferPanel() {
         ButtonGroup execGroup = new ButtonGroup();
@@ -257,7 +233,7 @@ public class ImageMagnetGUI extends JFrame {
         this.magnet.set_recursive(recursiveBox.isSelected());
         this.magnet.setWorkdir(this.workingdirPath.getText());
         System.out.println("Settings applied: " + this.magnet.printSettings());
-
+        this.magnet.setExtentions(this.extension_field.getText());
         this.magnet.attract(this.targetPath.getText());
 
         JOptionPane.showMessageDialog(this, this.magnet.getOutcome(), "Completed!", JOptionPane.INFORMATION_MESSAGE);
