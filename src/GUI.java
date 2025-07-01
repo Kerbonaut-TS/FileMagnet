@@ -1,5 +1,4 @@
-import src.Magnet;
-import src.Utilities;
+package src;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-public class ImageMagnetGUI extends JFrame {
+public class GUI extends JFrame {
 
     Magnet magnet;
     JTextField workingdirPath, targetPath;
@@ -22,7 +21,7 @@ public class ImageMagnetGUI extends JFrame {
     //Panels
 
 
-    public ImageMagnetGUI() throws IOException {
+    public GUI() throws IOException {
 
         super("File Magnet v0.92");
         this.magnet = new Magnet(System.getProperty("user.dir"));
@@ -243,7 +242,7 @@ public class ImageMagnetGUI extends JFrame {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                new ImageMagnetGUI();
+                new GUI();
             } catch (IOException e) {
                 e.printStackTrace(); // Log the exception or handle it appropriately
                 JOptionPane.showMessageDialog(null, "Failed to initialize the GUI: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

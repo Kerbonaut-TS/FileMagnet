@@ -12,7 +12,6 @@ public class Magnet extends FileComparator{
 
     static int MODE_COPY = 0;
     static int MODE_MOVE = 1;
-
     int count_analyzed = 0;
     int count_ignored = 0;
     int count_transferred = 0;
