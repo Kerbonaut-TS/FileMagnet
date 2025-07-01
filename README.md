@@ -33,7 +33,7 @@ for machine learning image recognition.
 
 ### Attraction logic and similarity rules
 
-The app will attract its location files that share similarities with the existing directory content:
+The app will attract to its location files that share similarities with the existing directory content:
 
 <b> Same Filenames </b>:
 - same extension
