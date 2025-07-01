@@ -2,7 +2,7 @@
 Place the executable in a folder with images to attract similar content to its location
 
 #### ⬇️  [Download .exe](https://github.com/Kerbonaut-TS/ImageMagnet/releases/download/v0.92/ImageMagnet.exe) <br>
-#### ⬇️  [Download executable .jar] (https://github.com/Kerbonaut-TS/ImageMagnet/releases/download/v0.92/ImageMagnet.jar)
+#### ⬇️  [Download executable .jar](https://github.com/Kerbonaut-TS/ImageMagnet/releases/download/v0.92/ImageMagnet.jar)
 
 The idea behind file magnet is to have a portable app that you can move from folder to folder, allowing with few clicks to move similar images to the same location.
 The similarity is assessed on criteria that can be selected or excluded: 
