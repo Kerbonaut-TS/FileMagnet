@@ -21,30 +21,32 @@ for machine learning image recognition.
 
 
 
-Instructions: 
+### Instructions: 
 
 1. place the app in a folder that contains images.
 2. launch the jar/exe 
 4. select the folder from which you want to attract more files
 3. chose similarity criterias 
 4. (Most settings are pre-filled based on the folder content) 
-5. press start.
+5. press Go!.
 
 
 ### Attraction logic and similarity rules
 
-attract files with 
+The app will attract its location files that share similarities with the existing directory content:
 
+<b> Same Filenames </b>:
 - same extension
 - same name (but different extension)
 
-
-similar timestamp (multiple selections possible)
-- same date 
+<b> Same Time Taken </b>: 
+- same date
 - same hour 
 - same minute
-- same second
+- same second <br>
+<i> (multiple selections possible) </i> <br>
 
-similar content
-- Exactly same content: RGB statistics and file size match. 
-- Similar but not same  content (WIP)
+<b> Same Images </b>:
+
+- Exactly same image: RGB statistics and file size match. 
+- Similar but not same image (WIP)
