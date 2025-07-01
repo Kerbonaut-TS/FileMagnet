@@ -1,16 +1,25 @@
-# FileMagnet (WIP)
+# ImageMagnet (WIP)
 Place the executable in a folder with images to attract similar content to its location
+
+#### ⬇️  [Download .exe](https://github.com/Kerbonaut-TS/ImageMagnet/releases/download/v0.92/ImageMagnet.exe) <br>
+#### ⬇️  [Download executable .jar] (https://github.com/Kerbonaut-TS/ImageMagnet/releases/download/v0.92/ImageMagnet.jar)
 
 The idea behind file magnet is to have a portable app that you can move from folder to folder, allowing with few clicks to move similar images to the same location.
 The similarity is assessed on criteria that can be selected or excluded: 
 
-same filenames
-same extensions 
-same timestamp 
-same or similar content (based on RGB statistics)
+✔️ same filenames <br>
+✔️ same extensions  <br>
+✔️ same timestamp <br>
+⌛  same or similar content (based on RGB statistics) <br>
+
+
+![image](https://github.com/user-attachments/assets/8e815d61-bb9d-4649-b07c-5ca0a517bdbe)
+
 
 It was ideated to optimize a photography workflow and organize image selections,  it can also be used to organize training sets 
 for machine learning image recognition.
+
+
 
 Instructions: 
 
