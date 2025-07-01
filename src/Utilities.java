@@ -40,4 +40,20 @@ public class Utilities {
         }
         java.nio.file.Files.write(logFile.toPath(), (message + System.lineSeparator()).getBytes(), java.nio.file.StandardOpenOption.APPEND);
     }
+
+    public static String printSettings(Magnet magnet) {
+        StringBuilder settings = new StringBuilder();
+        settings.append("Workdir: " + magnet.workdir.getAbsolutePath() + "\n");
+        settings.append("Transfer mode: " + (magnet.move ? "Move" : "Copy") + "\n");
+        settings.append("Recursive: " + magnet.recursive + "\n");
+        settings.append("CHECKS ===============================\n");
+        settings.append("filename check: " + magnet.check_enabled.get(magnet.FILENAME) + "\n");
+        settings.append("Extension check: " + magnet.check_enabled.get(magnet.EXTENSION) + "\n");
+        settings.append("Date check: " + magnet.check_enabled.get(magnet.DATE) + "\n");
+        settings.append("Hour check: " + magnet.check_enabled.get(magnet.HOUR) + "\n");
+        settings.append("Minute check: " + magnet.check_enabled.get(magnet.MINUTE) + "\n");
+        settings.append("Second check: " + magnet.check_enabled.get(magnet.SECOND) + "\n");
+
+        return settings.toString();
+    }
 }

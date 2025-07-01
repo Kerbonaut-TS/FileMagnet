@@ -9,7 +9,7 @@ public class TimestampParser {
     boolean isValid = false;
     private Calendar calendar;
     public Date timestamp;
-    String formats[] = {
+    String[] formats = {
             "yyyy:MM:dd HH:mm:ss",
             "yyyy-MM-dd HH:mm:ss",
             "yyyy/MM/dd HH:mm:ss",

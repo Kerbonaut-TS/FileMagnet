@@ -79,21 +79,6 @@ public class Magnet extends FileComparator{
         return outcome;
      }
 
-    public String printSettings() {
-        StringBuilder settings = new StringBuilder();
-        settings.append("Workdir: " + this.workdir.getAbsolutePath() + "\n");
-        settings.append("Transfer mode: " + (this.move ? "Move" : "Copy") + "\n");
-        settings.append("Recursive: " + this.recursive + "\n");
-        settings.append("CHECKS ===============================\n");
-        settings.append("filename check: " + this.check_enabled.get(FILENAME) + "\n");
-        settings.append("Extension check: " + this.check_enabled.get(EXTENSION) + "\n");
-        settings.append("Date check: " + this.check_enabled.get(DATE) + "\n");
-        settings.append("Hour check: " + this.check_enabled.get(HOUR) + "\n");
-        settings.append("Minute check: " + this.check_enabled.get(MINUTE) + "\n");
-        settings.append("Second check: " + this.check_enabled.get(SECOND) + "\n");
-
-        return settings.toString();
-    }
 
 
 }

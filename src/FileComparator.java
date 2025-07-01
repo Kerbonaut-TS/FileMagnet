@@ -75,23 +75,31 @@ public class FileComparator {
 
     }
 
-    public String getExtensions() {
+    public Enumeration<String> getExtensions() {
+        Dictionary<String , Boolean> uniqueExtensions = new Hashtable<>();
+        for (String e : this.extensions) {
+            uniqueExtensions.put(e, true);
+        }
+        uniqueExtensions.remove("");
+        uniqueExtensions.remove(".jar");
+        uniqueExtensions.remove(".log");
+        uniqueExtensions.remove(".log");
+
+
+
+        return uniqueExtensions.keys();
+    }
+
+    public String getExtensionsString() {
         StringBuilder sb = new StringBuilder();
-        Enumeration<String> keys = this.getUniqueExtensions();
+        Enumeration<String> keys = this.getExtensions();
         while (keys.hasMoreElements()) {
             String name = keys.nextElement();
-            sb.append(name).append(" ; ");
+            sb.append(name).append(";");
         }
         return sb.toString();
     }
 
-    public Enumeration<String> getUniqueExtensions() {
-        Dictionary<String , Boolean> uniqueExtensions = new Hashtable<>();
-        for (String e : this.extensions) {
-                uniqueExtensions.put(e, true);
-        }
-        return uniqueExtensions.keys();
-    }
 
     public void setExtentions (String extensions) {
         if (extensions == null || extensions.isEmpty()) {
@@ -111,7 +119,7 @@ public class FileComparator {
         int count = 0;
         for (String name : this.filenames) {
             if(name != null & name.length() > 1) {
-                sb.append(name).append(" ; ");
+                sb.append(name).append(";");
                 count++;
             }
             if (count >= limit) break;
@@ -181,7 +189,7 @@ public class FileComparator {
     }
 
     private Boolean check_extension(String extension){
-        Enumeration<String> unique_extentions = this.getUniqueExtensions();
+        Enumeration<String> unique_extentions = this.getExtensions();
         while (unique_extentions.hasMoreElements()) {
             String ext = unique_extentions.nextElement();
             if (ext.contains(extension)) return true;

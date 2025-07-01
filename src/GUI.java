@@ -142,7 +142,7 @@ public class GUI extends JFrame {
         //init components in this section
         extension_field = new JFormattedTextField();
         extension_field.setColumns(10);
-        extension_field.setText(this.magnet.getExtensions());
+        extension_field.setText(this.magnet.getExtensionsString());
         //create a vertical list
         namelist = new JList<>(this.magnet.getFileNames(4).split(";"));
         namelist.setLayoutOrientation(JList.VERTICAL);
@@ -231,7 +231,7 @@ public class GUI extends JFrame {
         this.magnet.set_trasfer_mode(move_radio.isSelected());
         this.magnet.set_recursive(recursiveBox.isSelected());
         this.magnet.setWorkdir(this.workingdirPath.getText());
-        System.out.println("Settings applied: " + this.magnet.printSettings());
+        System.out.println("Settings applied: " + Utilities.printSettings(this.magnet));
         this.magnet.setExtentions(this.extension_field.getText());
         this.magnet.attract(this.targetPath.getText());
 
