@@ -262,13 +262,13 @@ public class FileComparator {
         ignore_count = 0;
         i = 0;
 
-        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("FileMagnet")) ignore_count++;
+        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("ImageMagnet")) ignore_count++;
 
         int file_count = fileList.length - ignore_count;
         File[] newList = new File[file_count];
 
         for (File f : fileList) {
-            if (!(f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("FileMagnet"))) {
+            if (!(f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("ImageMagnet"))) {
                 newList[i] = f;
                 i++;
             }
