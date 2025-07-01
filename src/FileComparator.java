@@ -5,7 +5,6 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
-import src.TimestampParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -211,7 +210,7 @@ public class FileComparator {
                 } else {
                     result = false;
                 }
-                if (result == true) {
+                if (result) {
                     return true;
                 }
 
@@ -262,13 +261,13 @@ public class FileComparator {
         ignore_count = 0;
         i = 0;
 
-        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("ImageMagnet")) ignore_count++;
+        for (File f : fileList) if (f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0, 1).equals(".") | f.getName().contains("ImageMagnet")) ignore_count++;
 
         int file_count = fileList.length - ignore_count;
         File[] newList = new File[file_count];
 
         for (File f : fileList) {
-            if (!(f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0,1) == "."| f.getName().contains("ImageMagnet"))) {
+            if (!(f.isDirectory() |  f.isHidden() | !f.getName().contains(".") | f.getName().substring(0, 1).equals(".") | f.getName().contains("ImageMagnet"))) {
                 newList[i] = f;
                 i++;
             }
